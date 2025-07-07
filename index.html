@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jirê Sushi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Jirê Sushi</h1>
+  <p id="statusLoja">Verificando status...</p>
+
+  <div id="cardapio"></div>
+
+  <div id="carrinho">
+    <h2>🛒 Carrinho</h2>
+    <ul id="itensCarrinho"></ul>
+    <p>Total: R$ <span id="total">0.00</span></p>
+  </div>
+
+  <!-- Botão fixo do WhatsApp -->
+  <button id="btnFixado" onclick="finalizarPedido()">Enviar pedido via WhatsApp</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
