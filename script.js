@@ -87,7 +87,7 @@ function finalizarPedido() {
   mensagem += `%0A📍 Endereço: ${encodeURIComponent(endereco)}`;
   mensagem += `%0A💳 Pagamento: ${encodeURIComponent(pagamento)}`;
 
-  const telefone = "55DDNUMERO"; // Ex: 5511912345678
+  const telefone = "5511967245949"; // Ex: 5511912345678
   const url = `https://wa.me/${telefone}?text=${mensagem}`;
 
   window.open(url, "_blank");
