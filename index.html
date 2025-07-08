@@ -12,11 +12,16 @@
 
   <div id="cardapio"></div>
 
-  <div id="carrinho">
+  <!-- Botão que abre o carrinho -->
+  <button id="botaoCarrinho" onclick="abrirCarrinho()">🛍️</button>
+
+  <!-- Carrinho flutuante -->
+  <div id="carrinho" class="oculto">
     <h2>🛒 Carrinho</h2>
     <ul id="itensCarrinho"></ul>
     <p>Total: R$ <span id="total">0.00</span></p>
     <button onclick="limparCarrinho()" style="background-color:#999;">🗑️ Esvaziar Carrinho</button>
+    <button onclick="fecharCarrinho()" style="background-color:#e60000; margin-top:10px;">Fechar</button>
   </div>
 
   <div id="dadosCliente">
@@ -34,10 +39,8 @@
     </select>
   </div>
 
-  <!-- Botão fixo do WhatsApp -->
   <button id="btnFixado" onclick="finalizarPedido()">Enviar pedido via WhatsApp</button>
 
-  <!-- Notificação flutuante -->
   <div id="notificacao">✅ Adicionado à sacola!</div>
 
   <script src="script.js"></script>
