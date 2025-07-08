@@ -64,9 +64,18 @@ button:hover {
 }
 
 #carrinho {
-  margin-top: 30px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border: 2px solid #e60000;
+  border-radius: 10px;
+  width: 280px;
   padding: 15px;
-  border-top: 2px solid #e60000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  z-index: 998;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 #carrinho h2 {
@@ -108,4 +117,19 @@ button:hover {
 
 #dadosCliente {
   margin-top: 30px;
+}
+
+/* Notificação flutuante */
+#notificacao {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  z-index: 999;
 }
