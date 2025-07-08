@@ -60,6 +60,20 @@ function adicionarCarrinho(produto) {
   itensCarrinho.appendChild(li);
 
   totalSpan.textContent = total.toFixed(2);
+
+  // Mostrar notificação sutil
+  const noti = document.getElementById("notificacao");
+  noti.style.opacity = "1";
+  setTimeout(() => {
+    noti.style.opacity = "0";
+  }, 1200);
+}
+
+function limparCarrinho() {
+  carrinho = [];
+  total = 0;
+  itensCarrinho.innerHTML = "";
+  totalSpan.textContent = "0.00";
 }
 
 function finalizarPedido() {
@@ -87,7 +101,7 @@ function finalizarPedido() {
   mensagem += `%0A📍 Endereço: ${encodeURIComponent(endereco)}`;
   mensagem += `%0A💳 Pagamento: ${encodeURIComponent(pagamento)}`;
 
-  const telefone = "5511967245949"; // Ex: 5511912345678
+  const telefone = "SEU_NUMERO_AQUI"; // Ex: 5511912345678
   const url = `https://wa.me/${telefone}?text=${mensagem}`;
 
   window.open(url, "_blank");
