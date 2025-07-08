@@ -12,16 +12,14 @@
 
   <div id="cardapio"></div>
 
-  <!-- Botão que abre o carrinho -->
-  <button id="botaoCarrinho" onclick="abrirCarrinho()">🛍️</button>
+  <button id="botaoCarrinho" onclick="alternarCarrinho()">🛍️</button>
 
-  <!-- Carrinho flutuante -->
   <div id="carrinho" class="oculto">
     <h2>🛒 Carrinho</h2>
     <ul id="itensCarrinho"></ul>
     <p>Total: R$ <span id="total">0.00</span></p>
-    <button onclick="limparCarrinho()" style="background-color:#999;">🗑️ Esvaziar Carrinho</button>
-    <button onclick="fecharCarrinho()" style="background-color:#e60000; margin-top:10px;">Fechar</button>
+    <button onclick="limparCarrinho()">🗑️ Esvaziar Carrinho</button>
+    <button onclick="fecharCarrinho()">Fechar</button>
   </div>
 
   <div id="dadosCliente">
@@ -35,7 +33,6 @@
       <option value="PIX">PIX</option>
       <option value="Cartão de crédito">Cartão de crédito</option>
       <option value="Cartão de débito">Cartão de débito</option>
-      <option value="Outro">Outro</option>
     </select>
   </div>
 
