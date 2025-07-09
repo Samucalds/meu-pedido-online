@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+    nav {
+      width: 200px;
+      background: #2c3e50;
+      color: white;
+      height: 100vh;
+      padding: 1rem;
+    }
+    nav h2 {
+      margin-top: 0;
+    }
+    nav a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+    }
+    main {
+      flex: 1;
+      padding: 2rem;
+    }
+    .produto {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .produto img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+    }
+    .acoes button {
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const senha = prompt("Digite a senha:");
+    if (senha !== "admin123") {
+      alert("Senha incorreta!");
+      window.location.href = "/";
+    }
+  </script>
+
+  <nav>
+    <h2>Painel</h2>
+    <a href="admin.html">Produtos</a>
+    <a href="adicionar.html">Adicionar Produto</a>
+    <a href="config.html">Configurações</a>
+  </nav>
+
+  <main>
+    <h1>Produtos</h1>
+    <div id="lista-produtos"></div>
+  </main>
+
+  <script>
+    const lista = document.getElementById("lista-produtos");
+    let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+
+    function renderizarProdutos() {
+      lista.innerHTML = "";
+      produtos.forEach((p, i) => {
+        const div = document.createElement("div");
+        div.className = "produto";
+        div.innerHTML = `
+          <div>
+            <img src="${p.imagem}" />
+            <strong>${p.nome}</strong><br>
+            <small>${p.descricao}</small><br>
+            <em>R$ ${p.preco.toFixed(2)}</em>
+          </div>
+          <div class="acoes">
+            <button onclick="alternar(${i})">
+              ${p.ativo ? "Pausar" : "Ativar"}
+            </button>
+            <button onclick="remover(${i})">Excluir</button>
+          </div>
+        `;
+        lista.appendChild(div);
+      });
+    }
+
+    function alternar(i) {
+      produtos[i].ativo = !produtos[i].ativo;
+      salvar();
+    }
+
+    function remover(i) {
+      if (confirm("Deseja excluir este produto?")) {
+        produtos.splice(i, 1);
+        salvar();
+      }
+    }
+
+    function salvar() {
+      localStorage.setItem("produtos", JSON.stringify(produtos));
+      renderizarProdutos();
+    }
+
+    renderizarProdutos();
+  </script>
+</body>
+</html>
