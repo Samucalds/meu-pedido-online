@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+    }
+    img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Configurações do Restaurante</h1>
+  <input type="text" id="nomeRestaurante" placeholder="Nome do restaurante">
+  <input type="text" id="horario" placeholder="Horário de funcionamento">
+  <input type="file" id="logo" accept="image/*">
+  <img id="preview" style="display:none">
+  <button onclick="salvarConfig()">Salvar</button>
+
+  <script>
+    const nomeInput = document.getElementById("nomeRestaurante");
+    const horarioInput = document.getElementById("horario");
+    const preview = document.getElementById("preview");
+    const config = JSON.parse(localStorage.getItem("config")) || {};
+
+    if (config.nome) nomeInput.value = config.nome;
+    if (config.horario) horarioInput.value = config.horario;
+    if (config.logo) {
+      preview.src = config.logo;
+      preview.style.display = "block";
+      preview.dataset.base64 = config.logo;
+    }
+
+    document.getElementById("logo").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        preview.src = evt.target.result;
+        preview.style.display = "block";
+        preview.dataset.base64 = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function salvarConfig() {
+      const nome = nomeInput.value.trim();
+      const horario = horarioInput.value.trim();
+      const logo = preview.dataset.base64 || "";
+      localStorage.setItem("config", JSON.stringify({ nome, horario, logo }));
+      alert("Configurações salvas com sucesso!");
+      window.location.href = "admin.html";
+    }
+  </script>
+</body>
+</html>
