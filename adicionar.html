@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Produto</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    input, textarea, button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      display: block;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Adicionar Produto</h1>
+  <input type="text" id="nome" placeholder="Nome do produto">
+  <textarea id="descricao" placeholder="Descrição"></textarea>
+  <input type="number" id="preco" placeholder="Preço">
+  <input type="file" id="imagem" accept="image/*">
+  <img id="preview" style="display:none">
+  <button onclick="salvarProduto()">Salvar</button>
+
+  <script>
+    const preview = document.getElementById("preview");
+    document.getElementById("imagem").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        preview.src = event.target.result;
+        preview.style.display = "block";
+        preview.dataset.base64 = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function salvarProduto() {
+      const nome = document.getElementById("nome").value;
+      const descricao = document.getElementById("descricao").value;
+      const preco = parseFloat(document.getElementById("preco").value);
+      const imagem = preview.dataset.base64 || "";
+
+      if (!nome || !descricao || !preco || !imagem) {
+        alert("Preencha todos os campos e selecione uma imagem.");
+        return;
+      }
+
+      const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+      produtos.push({ nome, descricao, preco, imagem, ativo: true });
+      localStorage.setItem("produtos", JSON.stringify(produtos));
+
+      alert("Produto salvo!");
+      window.location.href = "admin.html";
+    }
+  </script>
+</body>
+</html>
