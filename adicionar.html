@@ -8,27 +8,28 @@
       font-family: sans-serif;
       margin: 0;
       padding: 0;
-      display: flex;
+      background: #f9f9f9;
     }
     nav {
-      width: 200px;
       background: #2c3e50;
       color: white;
-      height: 100vh;
       padding: 1rem;
-    }
-    nav h2 {
-      margin-top: 0;
+      display: flex;
+      justify-content: space-around;
     }
     nav a {
-      display: block;
       color: white;
       text-decoration: none;
-      margin: 10px 0;
+      font-weight: bold;
     }
-    main {
-      flex: 1;
+    .conteudo {
       padding: 2rem;
+    }
+    .aba {
+      display: none;
+    }
+    .ativa {
+      display: block;
     }
     .produto {
       border: 1px solid #ccc;
@@ -46,6 +47,19 @@
     .acoes button {
       margin-left: 5px;
     }
+    form input, form textarea {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -53,19 +67,40 @@
     const senha = prompt("Digite a senha:");
     if (senha !== "admin123") {
       alert("Senha incorreta!");
-      window.location.href = "/meu-pedido-online/";
+      window.location.href = "/";
     }
   </script>  <nav>
-    <h2>Painel</h2>
-    <a href="admin.html">Produtos</a>
-    <a href="adicionar.html">Adicionar Produto</a>
-    <a href="config.html">Configurações</a>
-  </nav>  <main>
-    <h1>Produtos</h1>
-    <div id="lista-produtos"></div>
-  </main>  <script>
-    const lista = document.getElementById("lista-produtos");
+    <a href="#" onclick="abrirAba('produtos')">Produtos</a>
+    <a href="#" onclick="abrirAba('adicionar')">Adicionar Produto</a>
+    <a href="#" onclick="abrirAba('config')">Configurações</a>
+  </nav>  <div class="conteudo">
+    <div id="produtos" class="aba ativa">
+      <h1>Produtos</h1>
+      <div id="lista-produtos"></div>
+    </div><div id="adicionar" class="aba">
+  <h1>Adicionar Produto</h1>
+  <form onsubmit="adicionarProduto(event)">
+    <input type="text" id="nome" placeholder="Nome do produto" required>
+    <textarea id="descricao" placeholder="Descrição do produto" required></textarea>
+    <input type="number" id="preco" placeholder="Preço" required>
+    <input type="url" id="imagem" placeholder="URL da imagem" required>
+    <button type="submit">Salvar</button>
+  </form>
+</div>
+
+<div id="config" class="aba">
+  <h1>Configurações</h1>
+  <p>Em breve...</p>
+</div>
+
+  </div>  <script>
     let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+    const lista = document.getElementById("lista-produtos");
+
+    function abrirAba(id) {
+      document.querySelectorAll('.aba').forEach(div => div.classList.remove('ativa'));
+      document.getElementById(id).classList.add('ativa');
+    }
 
     function renderizarProdutos() {
       lista.innerHTML = "";
@@ -80,14 +115,24 @@
             <em>R$ ${p.preco.toFixed(2)}</em>
           </div>
           <div class="acoes">
-            <button onclick="alternar(${i})">
-              ${p.ativo ? "Pausar" : "Ativar"}
-            </button>
+            <button onclick="alternar(${i})">${p.ativo ? "Pausar" : "Ativar"}</button>
             <button onclick="remover(${i})">Excluir</button>
           </div>
         `;
         lista.appendChild(div);
       });
+    }
+
+    function adicionarProduto(event) {
+      event.preventDefault();
+      const nome = document.getElementById("nome").value;
+      const descricao = document.getElementById("descricao").value;
+      const preco = parseFloat(document.getElementById("preco").value);
+      const imagem = document.getElementById("imagem").value;
+
+      produtos.push({ nome, descricao, preco, imagem, ativo: true });
+      salvar();
+      abrirAba('produtos');
     }
 
     function alternar(i) {
@@ -103,10 +148,4 @@
     }
 
     function salvar() {
-      localStorage.setItem("produtos", JSON.stringify(produtos));
-      renderizarProdutos();
-    }
-
-    renderizarProdutos();
-  </script></body>
-</html>
+      localStorage.setItem("produtos", J
