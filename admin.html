@@ -3,33 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administração</title>
+  <title>Painel Administrativo</title>
   <style>
     body {
-      font-family: sans-serif;
       margin: 0;
-      padding: 0;
-      display: flex;
+      font-family: sans-serif;
+      background: #f9f9f9;
     }
     nav {
-      width: 200px;
+      display: flex;
       background: #2c3e50;
-      color: white;
-      height: 100vh;
       padding: 1rem;
-    }
-    nav h2 {
-      margin-top: 0;
-    }
-    nav a {
-      display: block;
       color: white;
-      text-decoration: none;
-      margin: 10px 0;
+      justify-content: center;
+      gap: 20px;
     }
-    main {
-      flex: 1;
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    nav button:hover {
+      text-decoration: underline;
+    }
+    .aba {
+      display: none;
       padding: 2rem;
+    }
+    .ativa {
+      display: block;
     }
     .produto {
       border: 1px solid #ccc;
@@ -47,9 +51,17 @@
     .acoes button {
       margin-left: 5px;
     }
+    input, textarea {
+      display: block;
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
   </style>
 </head>
 <body>
+
   <script>
     const senha = prompt("Digite a senha:");
     if (senha !== "admin123") {
@@ -59,22 +71,42 @@
   </script>
 
   <nav>
-    <h2>Painel</h2>
-    <a href="admin.html">Produtos</a>
-    <a href="adicionar.html">Adicionar Produto</a>
-    <a href="config.html">Configurações</a>
+    <button onclick="mostrarAba('produtos')">Produtos</button>
+    <button onclick="mostrarAba('adicionar')">Adicionar Produto</button>
+    <button onclick="mostrarAba('config')">Configurações</button>
   </nav>
 
-  <main>
+  <div id="produtos" class="aba ativa">
     <h1>Produtos</h1>
     <div id="lista-produtos"></div>
-  </main>
+  </div>
+
+  <div id="adicionar" class="aba">
+    <h1>Adicionar Produto</h1>
+    <input type="text" id="nome" placeholder="Nome do produto">
+    <input type="text" id="descricao" placeholder="Descrição">
+    <input type="number" id="preco" placeholder="Preço">
+    <input type="text" id="imagem" placeholder="URL da imagem">
+    <button onclick="adicionarProduto()">Salvar Produto</button>
+  </div>
+
+  <div id="config" class="aba">
+    <h1>Configurações</h1>
+    <p>Aqui você pode colocar futuras configurações da loja.</p>
+  </div>
 
   <script>
-    const lista = document.getElementById("lista-produtos");
+    function mostrarAba(id) {
+      document.querySelectorAll(".aba").forEach(div => {
+        div.classList.remove("ativa");
+      });
+      document.getElementById(id).classList.add("ativa");
+    }
+
     let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
 
     function renderizarProdutos() {
+      const lista = document.getElementById("lista-produtos");
       lista.innerHTML = "";
       produtos.forEach((p, i) => {
         const div = document.createElement("div");
@@ -87,14 +119,28 @@
             <em>R$ ${p.preco.toFixed(2)}</em>
           </div>
           <div class="acoes">
-            <button onclick="alternar(${i})">
-              ${p.ativo ? "Pausar" : "Ativar"}
-            </button>
+            <button onclick="alternar(${i})">${p.ativo ? "Pausar" : "Ativar"}</button>
             <button onclick="remover(${i})">Excluir</button>
           </div>
         `;
         lista.appendChild(div);
       });
+    }
+
+    function adicionarProduto() {
+      const nome = document.getElementById("nome").value;
+      const descricao = document.getElementById("descricao").value;
+      const preco = parseFloat(document.getElementById("preco").value);
+      const imagem = document.getElementById("imagem").value;
+
+      if (!nome || !descricao || isNaN(preco) || !imagem) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      produtos.push({ nome, descricao, preco, imagem, ativo: true });
+      salvar();
+      mostrarAba('produtos');
     }
 
     function alternar(i) {
