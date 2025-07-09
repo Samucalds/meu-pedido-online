@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,31 +70,38 @@
       alert("Senha incorreta!");
       window.location.href = "/";
     }
-  </script>  <nav>
+  </script>
+
+  <nav>
     <a href="#" onclick="abrirAba('produtos')">Produtos</a>
     <a href="#" onclick="abrirAba('adicionar')">Adicionar Produto</a>
     <a href="#" onclick="abrirAba('config')">Configurações</a>
-  </nav>  <div class="conteudo">
+  </nav>
+
+  <div class="conteudo">
     <div id="produtos" class="aba ativa">
       <h1>Produtos</h1>
       <div id="lista-produtos"></div>
-    </div><div id="adicionar" class="aba">
-  <h1>Adicionar Produto</h1>
-  <form onsubmit="adicionarProduto(event)">
-    <input type="text" id="nome" placeholder="Nome do produto" required>
-    <textarea id="descricao" placeholder="Descrição do produto" required></textarea>
-    <input type="number" id="preco" placeholder="Preço" required>
-    <input type="url" id="imagem" placeholder="URL da imagem" required>
-    <button type="submit">Salvar</button>
-  </form>
-</div>
+    </div>
 
-<div id="config" class="aba">
-  <h1>Configurações</h1>
-  <p>Em breve...</p>
-</div>
+    <div id="adicionar" class="aba">
+      <h1>Adicionar Produto</h1>
+      <form onsubmit="adicionarProduto(event)">
+        <input type="text" id="nome" placeholder="Nome do produto" required>
+        <textarea id="descricao" placeholder="Descrição do produto" required></textarea>
+        <input type="number" id="preco" placeholder="Preço" required>
+        <input type="url" id="imagem" placeholder="URL da imagem" required>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
 
-  </div>  <script>
+    <div id="config" class="aba">
+      <h1>Configurações</h1>
+      <p>Em breve...</p>
+    </div>
+  </div>
+
+  <script>
     let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
     const lista = document.getElementById("lista-produtos");
 
@@ -148,4 +156,12 @@
     }
 
     function salvar() {
-      localStorage.setItem("produtos", J
+      localStorage.setItem("produtos", JSON.stringify(produtos));
+      renderizarProdutos();
+    }
+
+    // Renderizar ao carregar
+    renderizarProdutos();
+  </script>
+</body>
+</html>
