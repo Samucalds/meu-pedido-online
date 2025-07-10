@@ -1,55 +1,53 @@
+// script.js
+
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+let carrinho = [];
 
 function carregarProdutos() {
-  const container = document.getElementById('produtos');
+  const container = document.getElementById('produtos-container');
   container.innerHTML = '';
 
-  produtos.forEach((produto, index) => {
-    if (produto.pausado) return;
-
-    const div = document.createElement('div');
-    div.className = 'produto';
-
-    const img = document.createElement('img');
-    img.src = produto.imagem || '';
-    img.alt = 'Imagem do produto';
-
-    const info = document.createElement('div');
-    info.innerHTML = `<strong>${produto.nome}</strong><br>${produto.descricao}<br><strong>R$ ${produto.preco.toFixed(2)}</strong>`;
-
-    const botao = document.createElement('button');
-    botao.textContent = 'Adicionar';
-    botao.onclick = () => adicionarAoCarrinho(index);
-
-    div.appendChild(img);
-    div.appendChild(info);
-    div.appendChild(botao);
-
-    container.appendChild(div);
-  });
+  produtos
+    .filter(p => !p.pausado)
+    .forEach((produto, index) => {
+      const div = document.createElement('div');
+      div.className = 'produto-card';
+      div.innerHTML = `
+        <img src="${produto.imagem}" alt="${produto.nome}" />
+        <h3>${produto.nome}</h3>
+        <p>${produto.descricao}</p>
+        <strong>R$ ${produto.preco.toFixed(2)}</strong>
+        <button onclick="adicionarAoCarrinho(${index})">Adicionar</button>
+      `;
+      container.appendChild(div);
+    });
 }
-
-let carrinho = [];
 
 function adicionarAoCarrinho(index) {
   carrinho.push(produtos[index]);
   atualizarCarrinho();
+  alert("Produto adicionado à sacola!");
 }
 
 function atualizarCarrinho() {
-  const lista = document.getElementById('itens-carrinho');
-  const totalSpan = document.getElementById('total');
+  const lista = document.getElementById('lista-carrinho');
+  const total = document.getElementById('total-carrinho');
   lista.innerHTML = '';
-  let total = 0;
 
-  carrinho.forEach((item) => {
-    total += parseFloat(item.preco);
-    const p = document.createElement('p');
-    p.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
-    lista.appendChild(p);
+  let soma = 0;
+  carrinho.forEach((item, i) => {
+    soma += item.preco;
+    const li = document.createElement('li');
+    li.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+    lista.appendChild(li);
   });
 
-  totalSpan.textContent = total.toFixed(2);
+  total.textContent = `R$ ${soma.toFixed(2)}`;
+}
+
+function toggleCarrinho() {
+  const carrinhoEl = document.getElementById('carrinho');
+  carrinhoEl.classList.toggle('oculto');
 }
 
 function esvaziarCarrinho() {
@@ -57,22 +55,33 @@ function esvaziarCarrinho() {
   atualizarCarrinho();
 }
 
-document.getElementById('formulario-pedido').addEventListener('submit', function (e) {
-  e.preventDefault();
-  if (carrinho.length === 0) return alert('Carrinho vazio');
+function enviarPedidoWhatsApp() {
+  if (carrinho.length === 0) {
+    alert("Carrinho vazio!");
+    return;
+  }
 
-  const nome = document.getElementById('nomeCliente').value;
-  const pagamento = document.getElementById('formaPagamento').value;
-  const endereco = document.getElementById('endereco').value;
+  const nome = document.getElementById('nomeCliente').value.trim();
+  const endereco = document.getElementById('enderecoCliente').value.trim();
+  const pagamento = document.getElementById('pagamentoCliente').value;
 
-  let mensagem = `*Pedido Jirê Sushi*%0A`;
-  carrinho.forEach((item) => {
-    mensagem += `• ${item.nome} - R$ ${item.preco.toFixed(2)}%0A`;
+  if (!nome || !endereco) {
+    alert("Preencha todos os campos!");
+    return;
+  }
+
+  let mensagem = `Olá, meu nome é ${nome}%0AEndereço: ${endereco}%0AForma de Pagamento: ${pagamento}%0A%0APedido:%0A`;
+  let total = 0;
+
+  carrinho.forEach(item => {
+    mensagem += `- ${item.nome} R$ ${item.preco.toFixed(2)}%0A`;
+    total += item.preco;
   });
 
-  mensagem += `%0ATotal: R$ ${document.getElementById('total').textContent}%0A`;
-  mensagem += `%0A*Nome:* ${nome}%0A*Pagamento:* ${pagamento}%0A*Endereço:* ${endereco}`;
+  mensagem += `%0ATotal: R$ ${total.toFixed(2)}`;
 
-  const url = `https://wa.me/SEUNUMEROAQUI?text=${mensagem}`;
-  window.open(url, '_blank');
-});
+  const numero = '5511967245949'; // Substitua pelo seu número
+  window.open(`https://wa.me/${5511967245949}?text=${mensagem}`, '_blank');
+}
+
+carregarProdutos();
