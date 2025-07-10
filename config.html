@@ -1,25 +1,54 @@
-<!-- config.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Configurações</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Configurações do Estabelecimento</h1>
-  <form>
-    <label>Nome do Estabelecimento</label>
-    <input type="text" placeholder="Ex: Jirê Sushi" />
+  <nav class="navbar">
+    <a href="admin.html">Produtos</a>
+    <a href="adicionar.html">Adicionar Produto</a>
+    <a href="config.html" class="ativo">Configurações</a>
+  </nav>
 
-    <label>Horário de Funcionamento</label>
-    <input type="text" placeholder="Ex: 18h às 23h" />
+  <main>
+    <h2>Configurações</h2>
+    <form id="form-config">
+      <label for="nomeEstabelecimentoInput">Nome do Estabelecimento</label>
+      <input type="text" id="nomeEstabelecimentoInput" required />
 
-    <label>Telefone de Atendimento</label>
-    <input type="text" placeholder="Ex: (11) 91234-5678" />
+      <label for="numeroWhatsApp">Número do WhatsApp (com DDD, apenas números)</label>
+      <input type="text" id="numeroWhatsApp" required />
 
-    <button type="submit">Salvar Configurações</button>
-  </form>
+      <button type="submit">Salvar Configurações</button>
+    </form>
+  </main>
+
+  <script>
+    const nomeInput = document.getElementById('nomeEstabelecimentoInput');
+    const numeroInput = document.getElementById('numeroWhatsApp');
+    const config = JSON.parse(localStorage.getItem('config')) || {};
+
+    // Carrega as configurações salvas
+    if (config.nome) nomeInput.value = config.nome;
+    if (config.numero) numeroInput.value = config.numero;
+
+    document.getElementById('form-config').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nome = nomeInput.value.trim();
+      const numero = numeroInput.value.trim().replace(/\D/g, '');
+
+      if (!nome || numero.length < 10) {
+        alert('Preencha todos os campos corretamente.');
+        return;
+      }
+
+      localStorage.setItem('config', JSON.stringify({ nome, numero }));
+      alert('Configurações salvas com sucesso!');
+    });
+  </script>
 </body>
 </html>
