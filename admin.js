@@ -1,3 +1,4 @@
+// admin.js
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
 
 function mostrarSecao(secao) {
@@ -76,5 +77,5 @@ document.getElementById('form-produto').addEventListener('submit', function (e) 
   reader.readAsDataURL(imagemInput.files[0]);
 });
 
-// Mostrar a seção de produtos ao carregar
+// Iniciar com a seção de produtos visível
 mostrarSecao('produtos');
