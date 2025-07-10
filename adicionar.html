@@ -1,30 +1,71 @@
-<!-- adicionar.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Adicionar Produto</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Adicionar Produto</h1>
-  <form id="form-produto">
-    <label for="nomeProduto">Nome do Produto</label>
-    <input type="text" id="nomeProduto" required>
+  <nav class="navbar">
+    <a href="admin.html">Produtos</a>
+    <a href="adicionar.html" class="ativo">Adicionar Produto</a>
+    <a href="config.html">Configurações</a>
+  </nav>
 
-    <label for="descricaoProduto">Descrição</label>
-    <textarea id="descricaoProduto" required></textarea>
+  <main>
+    <section class="secao" id="secao-adicionar" style="display: block;">
+      <h2>Adicionar Produto</h2>
+      <form id="form-produto">
+        <label for="nomeProduto">Nome do Produto</label>
+        <input type="text" id="nomeProduto" required />
 
-    <label for="precoProduto">Preço</label>
-    <input type="number" step="0.01" id="precoProduto" required>
+        <label for="descricaoProduto">Descrição</label>
+        <textarea id="descricaoProduto" required></textarea>
 
-    <label for="imagemProduto">Imagem do Produto</label>
-    <input type="file" id="imagemProduto" accept="image/*" required>
+        <label for="precoProduto">Preço</label>
+        <input type="text" id="precoProduto" required />
 
-    <button type="submit">Salvar Produto</button>
-  </form>
+        <label for="imagemProduto">Imagem do Produto</label>
+        <input type="file" id="imagemProduto" accept="image/*" required />
 
-  <script src="admin.js"></script>
+        <button type="submit">Salvar Produto</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+
+    document.getElementById('form-produto').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const nome = document.getElementById('nomeProduto').value.trim();
+      const descricao = document.getElementById('descricaoProduto').value.trim();
+      const precoInput = document.getElementById('precoProduto').value.trim().replace(',', '.');
+      const preco = parseFloat(precoInput);
+      const imagemInput = document.getElementById('imagemProduto');
+
+      if (!nome || !descricao || isNaN(preco) || !imagemInput.files.length) {
+        alert('Preencha todos os campos corretamente.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        produtos.push({
+          nome,
+          descricao,
+          preco,
+          imagem: reader.result,
+          pausado: false
+        });
+        localStorage.setItem('produtos', JSON.stringify(produtos));
+        alert('Produto adicionado com sucesso!');
+        window.location.href = 'admin.html';
+      };
+      reader.readAsDataURL(imagemInput.files[0]);
+    });
+  </script>
 </body>
 </html>
