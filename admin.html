@@ -1,50 +1,69 @@
-<!-- admin.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Painel Admin</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <nav class="navbar">
-    <button onclick="mostrarSecao('produtos')">Produtos</button>
-    <button onclick="mostrarSecao('adicionar')">Adicionar Produto</button>
-    <button onclick="mostrarSecao('configuracoes')">Configurações</button>
+    <a href="admin.html" class="ativo">Produtos</a>
+    <a href="adicionar.html">Adicionar Produto</a>
+    <a href="config.html">Configurações</a>
   </nav>
 
   <main>
-    <section id="secao-produtos" class="secao">
-      <h2>Produtos</h2>
+    <section id="secao-produtos">
+      <h2>Produtos Cadastrados</h2>
       <div id="lista-produtos"></div>
-    </section>
-
-    <section id="secao-adicionar" class="secao" style="display: none;">
-      <h2>Adicionar Produto</h2>
-      <form id="form-produto">
-        <label>Nome do Produto</label>
-        <input type="text" id="nomeProduto" required />
-
-        <label>Descrição</label>
-        <textarea id="descricaoProduto" required></textarea>
-
-        <label>Preço</label>
-        <input type="number" step="0.01" id="precoProduto" required />
-
-        <label>Imagem do Produto</label>
-        <input type="file" id="imagemProduto" accept="image/*" required />
-
-        <button type="submit">Salvar Produto</button>
-      </form>
-    </section>
-
-    <section id="secao-configuracoes" class="secao" style="display: none;">
-      <h2>Configurações</h2>
-      <p>Opções futuras...</p>
     </section>
   </main>
 
-  <script src="admin.js"></script>
+  <script>
+    const lista = document.getElementById('lista-produtos');
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+
+    function renderizarProdutos() {
+      lista.innerHTML = '';
+      produtos.forEach((produto, index) => {
+        const div = document.createElement('div');
+        div.className = 'produto';
+        div.innerHTML = `
+          <img src="${produto.imagem || ''}" width="80" height="80" style="object-fit:cover; border-radius: 4px;" />
+          <div>
+            <strong>${produto.nome}</strong><br>
+            ${produto.descricao}<br>
+            <strong>R$ ${parseFloat(produto.preco).toFixed(2)}</strong>
+          </div>
+          <div>
+            <button onclick="togglePausado(${index})">${produto.pausado ? 'Ativar' : 'Pausar'}</button>
+            <button onclick="excluir(${index})">Excluir</button>
+          </div>
+        `;
+        lista.appendChild(div);
+      });
+    }
+
+    function togglePausado(index) {
+      produtos[index].pausado = !produtos[index].pausado;
+      salvar();
+      renderizarProdutos();
+    }
+
+    function excluir(index) {
+      if (confirm('Tem certeza que deseja excluir?')) {
+        produtos.splice(index, 1);
+        salvar();
+        renderizarProdutos();
+      }
+    }
+
+    function salvar() {
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+    }
+
+    renderizarProdutos();
+  </script>
 </body>
 </html>
