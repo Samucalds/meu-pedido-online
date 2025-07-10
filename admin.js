@@ -24,7 +24,9 @@ function renderizarProdutos() {
         <strong>R$ ${parseFloat(produto.preco).toFixed(2)}</strong>
       </div>
       <div>
-        <button onclick="pausarProduto(${index})">${produto.pausado ? 'Ativar' : 'Pausar'}</button>
+        <button onclick="pausarProduto(${index})">
+          ${produto.pausado ? 'Ativar' : 'Pausar'}
+        </button>
         <button onclick="excluirProduto(${index})">Excluir</button>
       </div>
     `;
@@ -55,7 +57,8 @@ document.getElementById('form-produto').addEventListener('submit', function (e) 
 
   const nome = document.getElementById('nomeProduto').value;
   const descricao = document.getElementById('descricaoProduto').value;
-  const preco = parseFloat(document.getElementById('precoProduto').value.replace(',', '.'));
+  const precoRaw = document.getElementById('precoProduto').value;
+  const preco = parseFloat(precoRaw.replace(',', '.'));
   const imagemInput = document.getElementById('imagemProduto');
 
   if (!imagemInput.files.length) {
@@ -80,6 +83,6 @@ document.getElementById('form-produto').addEventListener('submit', function (e) 
 });
 
 // Iniciar com a seção de produtos visível
-if (document.getElementById('lista-produtos')) {
+if (window.location.pathname.includes('admin.html')) {
   mostrarSecao('produtos');
 }
