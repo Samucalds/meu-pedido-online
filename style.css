@@ -1,118 +1,87 @@
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
-  background: #fdf8f6;
+  font-family: sans-serif;
+  background: #fdf8f5;
+  color: #222;
 }
 
 header {
-  background: #fff;
-  padding: 10px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1rem;
+  background: #fff;
 }
 
 h1 {
+  color: red;
   margin: 0;
-  color: #d80000;
 }
 
-#statusLoja {
+#status-loja {
   color: green;
   font-weight: bold;
 }
 
-#cardapio {
-  padding: 20px;
-  display: grid;
-  gap: 15px;
+.produtos-container {
+  padding: 1rem;
 }
 
 .produto {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-  padding: 10px;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin: 1rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
+  background: #fff;
+  border-radius: 10px;
 }
 
 .produto img {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 5px;
-  margin-right: 10px;
+  border-radius: 8px;
 }
 
-.produto .info {
-  flex: 1;
-}
-
-.produto button {
-  background: #d80000;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 6px 10px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#sacolaToggle {
-  position: fixed;
-  right: 10px;
-  bottom: 10px;
-  background: #d80000;
-  color: white;
-  padding: 10px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 20px;
-}
-
-#sacola {
-  position: fixed;
-  right: 10px;
-  bottom: 60px;
-  background: white;
-  padding: 15px;
+.carrinho {
+  padding: 1rem;
+  background: #fff;
+  margin: 1rem;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  width: 90%;
-  max-width: 300px;
-  display: none;
 }
 
-#sacola h2 {
-  margin-top: 0;
-}
-
-#sacola.sacola-fechada {
-  display: none;
-}
-
-#sacola:not(.sacola-fechada) {
-  display: block;
-}
-
-#sacola button {
+textarea, input, select, button {
   display: block;
   width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  background: #d80000;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-whatsapp, .btn-esvaziar {
+  background: red;
   color: white;
   border: none;
-  border-radius: 5px;
-  font-weight: bold;
+  cursor: pointer;
 }
 
-input, textarea, select {
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  background: #2c3e50;
+  color: white;
+  padding: 0.5rem;
+}
+
+.navbar button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.secao {
+  padding: 1rem;
 }
