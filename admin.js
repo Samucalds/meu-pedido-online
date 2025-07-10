@@ -1,9 +1,11 @@
 // admin.js
+
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
 
 function mostrarSecao(secao) {
   document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
   document.getElementById(`secao-${secao}`).style.display = 'block';
+
   if (secao === 'produtos') renderizarProdutos();
 }
 
@@ -19,7 +21,7 @@ function renderizarProdutos() {
       <div>
         <strong>${produto.nome}</strong><br>
         ${produto.descricao || ''}<br>
-        <strong>R$ ${produto.preco.toFixed(2)}</strong>
+        <strong>R$ ${parseFloat(produto.preco).toFixed(2)}</strong>
       </div>
       <div>
         <button onclick="pausarProduto(${index})">${produto.pausado ? 'Ativar' : 'Pausar'}</button>
@@ -53,7 +55,7 @@ document.getElementById('form-produto').addEventListener('submit', function (e) 
 
   const nome = document.getElementById('nomeProduto').value;
   const descricao = document.getElementById('descricaoProduto').value;
-  const preco = parseFloat(document.getElementById('precoProduto').value);
+  const preco = parseFloat(document.getElementById('precoProduto').value.replace(',', '.'));
   const imagemInput = document.getElementById('imagemProduto');
 
   if (!imagemInput.files.length) {
@@ -78,4 +80,6 @@ document.getElementById('form-produto').addEventListener('submit', function (e) 
 });
 
 // Iniciar com a seção de produtos visível
-mostrarSecao('produtos');
+if (document.getElementById('lista-produtos')) {
+  mostrarSecao('produtos');
+}
