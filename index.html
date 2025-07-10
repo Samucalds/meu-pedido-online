@@ -1,44 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!-- index.html --><!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jirê Sushi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardápio Online</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <h1>Jirê Sushi</h1>
-    <p id="status-loja">Estamos abertos!</p>
-  </header>
+    <p id="horario">Funcionamento: 18h às 23h</p>
+  </header>  <main id="produtos-container"></main>  <div id="carrinho-icon" onclick="toggleCarrinho()">🛒</div>  <div id="carrinho" class="oculto">
+    <h2>Sacola</h2>
+    <ul id="lista-carrinho"></ul>
+    <p>Total: <span id="total-carrinho">R$ 0,00</span></p><label>Nome:</label>
+<input type="text" id="nomeCliente" placeholder="Digite seu nome" required>
 
-  <main>
-    <div id="produtos" class="produtos-container"></div>
+<label>Endereço:</label>
+<input type="text" id="enderecoCliente" placeholder="Digite seu endereço" required>
 
-    <div id="carrinho" class="carrinho">
-      <h2>Carrinho</h2>
-      <div id="itens-carrinho"></div>
-      <p>Total: R$ <span id="total">0.00</span></p>
+<label>Forma de Pagamento:</label>
+<select id="pagamentoCliente">
+  <option value="Dinheiro">Dinheiro</option>
+  <option value="Pix">Pix</option>
+  <option value="Cartão de Crédito">Cartão de Crédito</option>
+  <option value="Cartão de Débito">Cartão de Débito</option>
+</select>
 
-      <form id="formulario-pedido">
-        <label>Seu nome:</label>
-        <input type="text" id="nomeCliente" required />
-        <label>Forma de pagamento:</label>
-        <select id="formaPagamento">
-          <option value="Pix">Pix</option>
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão">Cartão</option>
-        </select>
-        <label>Endereço:</label>
-        <textarea id="endereco" required></textarea>
+<button onclick="enviarPedidoWhatsApp()">Enviar Pedido via WhatsApp</button>
+<button onclick="esvaziarCarrinho()">Esvaziar Carrinho</button>
 
-        <button type="submit" class="btn-whatsapp">Enviar pedido via WhatsApp</button>
-      </form>
-
-      <button onclick="esvaziarCarrinho()" class="btn-esvaziar">Esvaziar carrinho</button>
-    </div>
-  </main>
-
-  <script src="script.js"></script>
-</body>
+  </div>  <script src="script.js"></script></body>
 </html>
