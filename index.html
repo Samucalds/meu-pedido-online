@@ -1,83 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Jirê Sushi</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #fff9f6;
-      padding: 1rem;
-    }
-    h1 {
-      text-align: center;
-      color: red;
-    }
-    .status {
-      text-align: center;
-      color: green;
-      font-weight: bold;
-      margin-bottom: 2rem;
-    }
-    .produto {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 15px;
-      display: flex;
-      gap: 10px;
-      background: #fff;
-    }
-    .produto img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 5px;
-    }
-    .produto-info {
-      flex-grow: 1;
-    }
-    .produto-info h3 {
-      margin: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <header>
+    <h1>Jirê Sushi</h1>
+    <p id="status-loja">Estamos abertos!</p>
+  </header>
 
-  <h1>Jirê Sushi</h1>
-  <div class="status" id="statusLoja">Estamos abertos!</div>
+  <main>
+    <div id="produtos" class="produtos-container"></div>
 
-  <div id="cardapio"></div>
+    <div id="carrinho" class="carrinho">
+      <h2>Carrinho</h2>
+      <div id="itens-carrinho"></div>
+      <p>Total: R$ <span id="total">0.00</span></p>
 
-  <script>
-    function carregarProdutos() {
-      const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-      const cardapio = document.getElementById("cardapio");
-      cardapio.innerHTML = "";
+      <form id="formulario-pedido">
+        <label>Seu nome:</label>
+        <input type="text" id="nomeCliente" required />
+        <label>Forma de pagamento:</label>
+        <select id="formaPagamento">
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+        </select>
+        <label>Endereço:</label>
+        <textarea id="endereco" required></textarea>
 
-      const ativos = produtos.filter(p => p.ativo);
-      if (ativos.length === 0) {
-        cardapio.innerHTML = "<p>Nenhum produto disponível.</p>";
-        return;
-      }
+        <button type="submit" class="btn-whatsapp">Enviar pedido via WhatsApp</button>
+      </form>
 
-      ativos.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "produto";
-        div.innerHTML = `
-          <img src="${p.imagem}" alt="Imagem do produto">
-          <div class="produto-info">
-            <h3>${p.nome}</h3>
-            <p>${p.descricao}</p>
-            <strong>R$ ${p.preco.toFixed(2)}</strong>
-          </div>
-        `;
-        cardapio.appendChild(div);
-      });
-    }
+      <button onclick="esvaziarCarrinho()" class="btn-esvaziar">Esvaziar carrinho</button>
+    </div>
+  </main>
 
-    carregarProdutos();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
