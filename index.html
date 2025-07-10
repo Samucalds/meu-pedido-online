@@ -1,33 +1,123 @@
-<!-- index.html --><!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cardápio Online</title>
+  <title>Cardápio</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>Jirê Sushi</h1>
-    <p id="horario">Funcionamento: 18h às 23h</p>
-  </header>  <main id="produtos-container"></main>  <div id="carrinho-icon" onclick="toggleCarrinho()">🛒</div>  <div id="carrinho" class="oculto">
-    <h2>Sacola</h2>
-    <ul id="lista-carrinho"></ul>
-    <p>Total: <span id="total-carrinho">R$ 0,00</span></p><label>Nome:</label>
-<input type="text" id="nomeCliente" placeholder="Digite seu nome" required>
+    <h1 id="nomeEstabelecimento">Meu Restaurante</h1>
+  </header>
 
-<label>Endereço:</label>
-<input type="text" id="enderecoCliente" placeholder="Digite seu endereço" required>
+  <main>
+    <div id="produtos-container"></div>
 
-<label>Forma de Pagamento:</label>
-<select id="pagamentoCliente">
-  <option value="Dinheiro">Dinheiro</option>
-  <option value="Pix">Pix</option>
-  <option value="Cartão de Crédito">Cartão de Crédito</option>
-  <option value="Cartão de Débito">Cartão de Débito</option>
-</select>
+    <div id="sacola-btn" onclick="toggleSacola()">
+      🛒 <span id="qtd-sacola">0</span>
+    </div>
 
-<button onclick="enviarPedidoWhatsApp()">Enviar Pedido via WhatsApp</button>
-<button onclick="esvaziarCarrinho()">Esvaziar Carrinho</button>
+    <div id="sacola" class="sacola escondida">
+      <h3>Sacola</h3>
+      <div id="itens-sacola"></div>
+      <p>Total: R$ <span id="total-sacola">0.00</span></p>
 
-  </div>  <script src="script.js"></script></body>
+      <input type="text" id="nomeCliente" placeholder="Seu nome" required>
+      <input type="text" id="enderecoCliente" placeholder="Endereço" required>
+      <select id="pagamentoCliente">
+        <option value="">Forma de pagamento</option>
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão">Cartão</option>
+      </select>
+
+      <button onclick="enviarPedidoWhatsApp()">Enviar Pedido</button>
+      <button onclick="esvaziarSacola()">Esvaziar Sacola</button>
+    </div>
+  </main>
+
+  <script>
+    const container = document.getElementById('produtos-container');
+    const itensSacola = document.getElementById('itens-sacola');
+    const totalSacola = document.getElementById('total-sacola');
+    const qtdSacola = document.getElementById('qtd-sacola');
+    const sacolaDiv = document.getElementById('sacola');
+
+    let sacola = [];
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+
+    function renderizarCardapio() {
+      container.innerHTML = '';
+      produtos.filter(p => !p.pausado).forEach((produto, index) => {
+        const card = document.createElement('div');
+        card.className = 'card-produto';
+        card.innerHTML = `
+          <img src="${produto.imagem}" alt="${produto.nome}" />
+          <h3>${produto.nome}</h3>
+          <p>${produto.descricao}</p>
+          <strong>R$ ${produto.preco.toFixed(2)}</strong><br>
+          <button onclick="adicionarSacola(${index})">Adicionar</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function adicionarSacola(index) {
+      const produto = produtos[index];
+      sacola.push(produto);
+      atualizarSacola();
+    }
+
+    function atualizarSacola() {
+      itensSacola.innerHTML = '';
+      let total = 0;
+      sacola.forEach((item, i) => {
+        total += item.preco;
+        const div = document.createElement('div');
+        div.innerHTML = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+        itensSacola.appendChild(div);
+      });
+      totalSacola.textContent = total.toFixed(2);
+      qtdSacola.textContent = sacola.length;
+    }
+
+    function toggleSacola() {
+      sacolaDiv.classList.toggle('escondida');
+    }
+
+    function esvaziarSacola() {
+      sacola = [];
+      atualizarSacola();
+    }
+
+    function enviarPedidoWhatsApp() {
+      if (sacola.length === 0) return alert('Sacola vazia');
+
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const endereco = document.getElementById('enderecoCliente').value.trim();
+      const pagamento = document.getElementById('pagamentoCliente').value;
+
+      if (!nome || !endereco || !pagamento) {
+        return alert('Preencha todos os campos');
+      }
+
+      let msg = `🍣 *Novo Pedido* 🍣\n\n`;
+
+      sacola.forEach(item => {
+        msg += `• ${item.nome} - R$ ${item.preco.toFixed(2)}\n`;
+      });
+
+      msg += `\n*Total:* R$ ${totalSacola.textContent}`;
+      msg += `\n*Nome:* ${nome}`;
+      msg += `\n*Endereço:* ${endereco}`;
+      msg += `\n*Pagamento:* ${pagamento}`;
+
+      const fone = 'SEUNUMEROAQUI'; // Substitua por seu número com DDD, ex: 5511999999999
+      window.open(`https://wa.me/${5511967245949}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    renderizarCardapio();
+  </script>
+</body>
 </html>
