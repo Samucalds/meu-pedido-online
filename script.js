@@ -1,84 +1,94 @@
-// script.js
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-let carrinho = [];
+let config = JSON.parse(localStorage.getItem('config')) || {
+  nome: 'Meu Restaurante',
+  horario: '18h às 23h',
+  whatsapp: ''
+};
 
-function renderizarCardapio() {
-  const container = document.getElementById('produtos');
-  if (!container) return;
+document.getElementById('tituloRestaurante').innerText = config.nome;
+document.getElementById('horarioFuncionamento').innerText = `Funcionamento: ${config.horario}`;
+
+const container = document.getElementById('produtos');
+
+function renderizarProdutos() {
   container.innerHTML = '';
-
   produtos.filter(p => !p.pausado).forEach((produto, index) => {
     const card = document.createElement('div');
-    card.className = 'card-produto';
+    card.className = 'produto';
     card.innerHTML = `
-      <img src="${produto.imagem}" alt="${produto.nome}" />
+      <img src="${produto.imagem}" alt="${produto.nome}">
       <h3>${produto.nome}</h3>
       <p>${produto.descricao}</p>
-      <strong>R$ ${produto.preco.toFixed(2)}</strong>
-      <button onclick="adicionarAoCarrinho(${index})">Adicionar</button>
+      <strong>R$ ${produto.preco.toFixed(2)}</strong><br>
+      <button onclick="adicionarSacola(${index})">Adicionar</button>
     `;
     container.appendChild(card);
   });
 }
 
-function adicionarAoCarrinho(index) {
-  carrinho.push(produtos[index]);
-  atualizarSacola();
-}
+renderizarProdutos();
+
+// SACOLA (carrinho)
+let sacola = [];
 
 function atualizarSacola() {
-  const sacola = document.getElementById('sacola');
-  const contador = document.getElementById('contadorSacola');
-  if (!sacola) return;
-
-  sacola.innerHTML = '';
+  document.getElementById('contadorSacola').innerText = sacola.length;
+  const lista = document.getElementById('listaSacola');
+  lista.innerHTML = '';
   let total = 0;
-  carrinho.forEach((item, i) => {
+
+  sacola.forEach((item, i) => {
     total += item.preco;
-    sacola.innerHTML += `<p>${item.nome} - R$ ${item.preco.toFixed(2)} <button onclick="removerDoCarrinho(${i})">x</button></p>`;
+    const div = document.createElement('div');
+    div.innerHTML = `${item.nome} - R$ ${item.preco.toFixed(2)} <button onclick="removerSacola(${i})">Remover</button>`;
+    lista.appendChild(div);
   });
 
-  sacola.innerHTML += `<hr><p><strong>Total: R$ ${total.toFixed(2)}</strong></p>
-  <button onclick="esvaziarCarrinho()">Esvaziar</button>`;
-
-  contador.textContent = carrinho.length;
+  document.getElementById('totalSacola').innerText = total.toFixed(2);
 }
 
-function removerDoCarrinho(i) {
-  carrinho.splice(i, 1);
+function adicionarSacola(index) {
+  const produto = produtos[index];
+  sacola.push(produto);
   atualizarSacola();
 }
 
-function esvaziarCarrinho() {
-  carrinho = [];
+function removerSacola(index) {
+  sacola.splice(index, 1);
   atualizarSacola();
 }
 
-function toggleSacola() {
-  const sacola = document.getElementById('sacola');
-  sacola.style.display = sacola.style.display === 'none' ? 'block' : 'none';
-}
+document.getElementById('sacolaBtn').addEventListener('click', () => {
+  const sacolaEl = document.getElementById('sacola');
+  sacolaEl.style.display = sacolaEl.style.display === 'none' ? 'block' : 'none';
+});
 
-function enviarPedidoWhatsApp() {
-  if (carrinho.length === 0) {
-    alert('A sacola está vazia.');
+document.getElementById('enviarWhatsapp').addEventListener('click', () => {
+  if (!sacola.length) {
+    alert('Sua sacola está vazia.');
     return;
   }
 
-  const nome = document.getElementById('nomeCliente').value;
-  const endereco = document.getElementById('enderecoCliente').value;
+  const nome = document.getElementById('nomeCliente').value.trim();
+  const endereco = document.getElementById('enderecoCliente').value.trim();
   const pagamento = document.getElementById('pagamentoCliente').value;
-  const config = JSON.parse(localStorage.getItem('config')) || {};
-  const numero = config.numero || 'SEUNUMEROAQUI';
 
-  let mensagem = `*Pedido de ${nome}*\n`;
-  carrinho.forEach(item => {
-    mensagem += `- ${item.nome} (R$ ${item.preco.toFixed(2)})\n`;
+  if (!nome || !endereco) {
+    alert('Preencha todos os dados.');
+    return;
+  }
+
+  let mensagem = `Pedido de ${nome}%0A`;
+  mensagem += `Endereço: ${endereco}%0A`;
+  mensagem += `Forma de pagamento: ${pagamento}%0A%0A`;
+
+  sacola.forEach(item => {
+    mensagem += `🛍️ ${item.nome} - R$ ${item.preco.toFixed(2)}%0A`;
   });
-  mensagem += `\n*Endereço:* ${endereco}\n*Pagamento:* ${pagamento}\n*Total:* R$ ${carrinho.reduce((t, p) => t + p.preco, 0).toFixed(2)}`;
 
-  const url = `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`;
-  window.open(url);
-}
+  const total = sacola.reduce((acc, item) => acc + item.preco, 0);
+  mensagem += `%0ATotal: R$ ${total.toFixed(2)}`;
 
-renderizarCardapio();
+  const numero = config.whatsapp.replace(/\D/g, '');
+  window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank');
+});
