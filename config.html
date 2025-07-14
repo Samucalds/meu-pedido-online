@@ -4,51 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Configurações</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="navbar">
-    <a href="admin.html">Produtos</a>
-    <a href="adicionar.html">Adicionar Produto</a>
-    <a href="config.html" class="ativo">Configurações</a>
+  <header class="header">
+    <h1>Configurações</h1>
+  </header>
+  <nav class="nav">
+    <button onclick="location.href='admin.html'">Produtos</button>
+    <button onclick="location.href='adicionar.html'">Adicionar Produto</button>
+    <button onclick="location.href='config.html'">Configurações</button>
   </nav>
 
-  <main>
-    <h2>Configurações</h2>
-    <form id="form-config">
-      <label for="nomeEstabelecimentoInput">Nome do Estabelecimento</label>
-      <input type="text" id="nomeEstabelecimentoInput" required />
-
-      <label for="numeroWhatsApp">Número do WhatsApp (com DDD, apenas números)</label>
-      <input type="text" id="numeroWhatsApp" required />
-
-      <button type="submit">Salvar Configurações</button>
-    </form>
-  </main>
+  <section class="formulario">
+    <label>Nome do Estabelecimento</label>
+    <input type="text" id="nomeLoja">
+    <label>Número do WhatsApp (com DDD)</label>
+    <input type="text" id="whatsapp">
+    <label>Horário de Funcionamento</label>
+    <input type="text" id="funcionamento">
+    <button onclick="salvarConfig()">Salvar Configurações</button>
+  </section>
 
   <script>
-    const nomeInput = document.getElementById('nomeEstabelecimentoInput');
-    const numeroInput = document.getElementById('numeroWhatsApp');
-    const config = JSON.parse(localStorage.getItem('config')) || {};
+    function salvarConfig() {
+      const nome = document.getElementById('nomeLoja').value.trim();
+      const whatsapp = document.getElementById('whatsapp').value.trim();
+      const funcionamento = document.getElementById('funcionamento').value.trim();
 
-    // Carrega as configurações salvas
-    if (config.nome) nomeInput.value = config.nome;
-    if (config.numero) numeroInput.value = config.numero;
-
-    document.getElementById('form-config').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const nome = nomeInput.value.trim();
-      const numero = numeroInput.value.trim().replace(/\D/g, '');
-
-      if (!nome || numero.length < 10) {
-        alert('Preencha todos os campos corretamente.');
-        return;
-      }
-
-      localStorage.setItem('config', JSON.stringify({ nome, numero }));
+      const config = { nome, whatsapp, funcionamento };
+      localStorage.setItem('configLoja', JSON.stringify(config));
       alert('Configurações salvas com sucesso!');
-    });
+    }
+
+    window.onload = () => {
+      const config = JSON.parse(localStorage.getItem('configLoja')) || {};
+      document.getElementById('nomeLoja').value = config.nome || '';
+      document.getElementById('whatsapp').value = config.whatsapp || '';
+      document.getElementById('funcionamento').value = config.funcionamento || '';
+    };
   </script>
 </body>
 </html>
