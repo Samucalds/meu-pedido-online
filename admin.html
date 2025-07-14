@@ -1,51 +1,180 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Meu Pedido Online</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    header {
+      background-color: #ff4d4d;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      background-color: #ff4d4d;
+      padding: 0.5rem 0;
+    }
+
+    nav button {
+      background: white;
+      color: #ff4d4d;
+      border: none;
+      border-radius: 12px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    nav button:hover {
+      background-color: #ffeaea;
+    }
+
+    section {
+      padding: 1rem;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .produto {
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .produto img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+    }
+
+    .produto h3 {
+      margin: 0.3rem 0 0.2rem;
+      font-size: 1.1rem;
+    }
+
+    .produto p {
+      margin: 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .produto strong {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .botoes {
+      margin-top: 0.8rem;
+      display: flex;
+      gap: 10px;
+    }
+
+    .botoes button {
+      flex: 1;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-pausar {
+      background-color: #ff9800;
+    }
+
+    .btn-pausar:hover {
+      background-color: #e68900;
+    }
+
+    .btn-excluir {
+      background-color: #f44336;
+    }
+
+    .btn-excluir:hover {
+      background-color: #d32f2f;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar">
-    <button onclick="mostrarSecao('produtos')">Produtos</button>
-    <button onclick="mostrarSecao('adicionar')">Adicionar Produto</button>
-    <button onclick="mostrarSecao('configuracoes')">Configurações</button>
+  <header>Painel Administrativo</header>
+
+  <nav>
+    <button onclick="location.href='admin.html'">Produtos</button>
+    <button onclick="location.href='adicionar.html'">Adicionar Produto</button>
+    <button onclick="location.href='config.html'">Configurações</button>
   </nav>
 
-  <main>
-    <section id="secao-produtos" class="secao">
-      <h2>Produtos</h2>
-      <div id="lista-produtos"></div>
-    </section>
+  <section>
+    <h2>Produtos Cadastrados</h2>
+    <div id="listaProdutos"></div>
+  </section>
 
-    <section id="secao-adicionar" class="secao" style="display: none;">
-      <h2>Adicionar Produto</h2>
-      <form id="form-produto">
-        <label>Nome do Produto</label>
-        <input type="text" id="nomeProduto" required />
-        <label>Descrição</label>
-        <textarea id="descricaoProduto" required></textarea>
-        <label>Preço</label>
-        <input type="number" step="0.01" id="precoProduto" required />
-        <label>Imagem do Produto</label>
-        <input type="file" id="imagemProduto" accept="image/*" required />
-        <button type="submit">Salvar Produto</button>
-      </form>
-    </section>
+  <script>
+    function carregarProdutos() {
+      const container = document.getElementById('listaProdutos');
+      const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+      container.innerHTML = '';
+      produtos.forEach((p, index) => {
+        const div = document.createElement('div');
+        div.className = 'produto';
+        div.innerHTML = `
+          <img src="${p.imagem}" alt="${p.nome}">
+          <h3>${p.nome}</h3>
+          <p>${p.descricao}</p>
+          <strong>R$ ${parseFloat(p.preco).toFixed(2)}</strong>
+          <div class="botoes">
+            <button class="btn-pausar" onclick="pausar(${index})">${p.pausado ? 'Ativar' : 'Pausar'}</button>
+            <button class="btn-excluir" onclick="excluir(${index})">Excluir</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
 
-    <section id="secao-configuracoes" class="secao" style="display: none;">
-      <h2>Configurações do Estabelecimento</h2>
-      <form id="form-config">
-        <label>Nome do Restaurante</label>
-        <input type="text" id="config-nome" />
-        <label>WhatsApp (somente números com DDD)</label>
-        <input type="text" id="config-numero" />
-        <button type="submit">Salvar Configurações</button>
-      </form>
-    </section>
-  </main>
+    function pausar(index) {
+      const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+      produtos[index].pausado = !produtos[index].pausado;
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      carregarProdutos();
+    }
 
-  <script src="admin.js"></script>
+    function excluir(index) {
+      const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+      produtos.splice(index, 1);
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      carregarProdutos();
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarProdutos);
+  </script>
 </body>
 </html>
