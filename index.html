@@ -1,46 +1,38 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meu Pedido Online</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <h1 id="nomeRestaurante">Meu Restaurante</h1>
+    <h1 id="tituloRestaurante">Meu Restaurante</h1>
+    <p id="horarioFuncionamento"></p>
   </header>
-
   <main>
-    <div id="produtos"></div>
-
-    <div id="sacola-flutuante">
-      <button onclick="toggleSacola()">
-        <img src="carrinho.svg" alt="Sacola" width="30" />
-        <span id="contadorSacola">0</span>
-      </button>
-      <div id="sacola" style="display: none;"></div>
-    </div>
-
-    <section id="finalizar">
-      <h2>Finalizar Pedido</h2>
-      <input type="text" id="nomeCliente" placeholder="Seu nome" required />
-      <input type="text" id="enderecoCliente" placeholder="Endereço completo" required />
+    <div id="produtos" class="grid"></div>
+    <button id="sacolaBtn">
+      <img src="sacola.png" alt="Sacola" width="24" />
+      Sacola <span id="contadorSacola">0</span>
+    </button>
+    <section id="sacola" style="display:none">
+      <h2>Sacola</h2>
+      <div id="listaSacola"></div>
+      <p>Total: R$ <span id="totalSacola">0.00</span></p>
+      <h3>Finalizar Pedido</h3>
+      <input type="text" id="nomeCliente" placeholder="Seu nome">
+      <input type="text" id="enderecoCliente" placeholder="Endereço completo">
       <select id="pagamentoCliente">
-        <option value="Pix">Pix</option>
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Crédito">Crédito</option>
-        <option value="Débito">Débito</option>
+        <option>Pix</option>
+        <option>Dinheiro</option>
+        <option>Cartão</option>
       </select>
-      <button onclick="enviarPedidoWhatsApp()">Enviar para WhatsApp</button>
+      <button id="enviarWhatsapp">Enviar para WhatsApp</button>
     </section>
   </main>
-
   <script src="script.js"></script>
-  <script>
-    const config = JSON.parse(localStorage.getItem('config')) || {};
-    const nomeRestaurante = config.nome || 'Meu Restaurante';
-    document.getElementById('nomeRestaurante').textContent = nomeRestaurante;
-  </script>
 </body>
 </html>
