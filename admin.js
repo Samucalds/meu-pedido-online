@@ -1,11 +1,9 @@
 // admin.js
-
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
 
 function mostrarSecao(secao) {
   document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
   document.getElementById(`secao-${secao}`).style.display = 'block';
-
   if (secao === 'produtos') renderizarProdutos();
 }
 
@@ -21,12 +19,10 @@ function renderizarProdutos() {
       <div>
         <strong>${produto.nome}</strong><br>
         ${produto.descricao || ''}<br>
-        <strong>R$ ${parseFloat(produto.preco).toFixed(2)}</strong>
+        <strong>R$ ${produto.preco.toFixed(2)}</strong>
       </div>
       <div>
-        <button onclick="pausarProduto(${index})">
-          ${produto.pausado ? 'Ativar' : 'Pausar'}
-        </button>
+        <button onclick="pausarProduto(${index})">${produto.pausado ? 'Ativar' : 'Pausar'}</button>
         <button onclick="excluirProduto(${index})">Excluir</button>
       </div>
     `;
@@ -55,14 +51,13 @@ function salvarProdutos() {
 document.getElementById('form-produto').addEventListener('submit', function (e) {
   e.preventDefault();
 
-  const nome = document.getElementById('nomeProduto').value;
-  const descricao = document.getElementById('descricaoProduto').value;
-  const precoRaw = document.getElementById('precoProduto').value;
-  const preco = parseFloat(precoRaw.replace(',', '.'));
+  const nome = document.getElementById('nomeProduto').value.trim();
+  const descricao = document.getElementById('descricaoProduto').value.trim();
+  const preco = parseFloat(document.getElementById('precoProduto').value);
   const imagemInput = document.getElementById('imagemProduto');
 
   if (!imagemInput.files.length) {
-    alert("Selecione uma imagem do produto.");
+    alert('Escolha uma imagem.');
     return;
   }
 
@@ -82,7 +77,4 @@ document.getElementById('form-produto').addEventListener('submit', function (e) 
   reader.readAsDataURL(imagemInput.files[0]);
 });
 
-// Iniciar com a seção de produtos visível
-if (window.location.pathname.includes('admin.html')) {
-  mostrarSecao('produtos');
-}
+mostrarSecao('produtos');
