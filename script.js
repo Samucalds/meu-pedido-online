@@ -1,71 +1,76 @@
-let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-let config = JSON.parse(localStorage.getItem('config')) || {
-  nome: 'Meu Restaurante',
-  horario: '18h às 23h',
-  whatsapp: ''
-};
+function carregarConfig() {
+  const config = JSON.parse(localStorage.getItem('configLoja')) || {};
+  document.getElementById('nomeLoja').innerText = config.nome || 'Minha Loja';
+  document.getElementById('statusLoja').innerText = config.funcionamento
+    ? `Funcionamento: ${config.funcionamento}`
+    : 'Funcionamento: --';
+}
 
-document.getElementById('tituloRestaurante').innerText = config.nome;
-document.getElementById('horarioFuncionamento').innerText = `Funcionamento: ${config.horario}`;
+function carregarProdutos() {
+  const lista = document.getElementById('produtos');
+  const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
 
-const container = document.getElementById('produtos');
+  lista.innerHTML = '';
 
-function renderizarProdutos() {
-  container.innerHTML = '';
-  produtos.filter(p => !p.pausado).forEach((produto, index) => {
-    const card = document.createElement('div');
-    card.className = 'produto';
-    card.innerHTML = `
-      <img src="${produto.imagem}" alt="${produto.nome}">
-      <h3>${produto.nome}</h3>
-      <p>${produto.descricao}</p>
-      <strong>R$ ${produto.preco.toFixed(2)}</strong><br>
+  produtos.forEach((p, index) => {
+    if (p.pausado) return;
+
+    const div = document.createElement('div');
+    div.className = 'produto';
+    div.innerHTML = `
+      <img src="${p.imagem}" alt="${p.nome}">
+      <h3>${p.nome}</h3>
+      <p>${p.descricao}</p>
+      <strong>R$ ${parseFloat(p.preco).toFixed(2)}</strong><br>
       <button onclick="adicionarSacola(${index})">Adicionar</button>
     `;
-    container.appendChild(card);
-  });
-}
-
-renderizarProdutos();
-
-// SACOLA (carrinho)
-let sacola = [];
-
-function atualizarSacola() {
-  document.getElementById('contadorSacola').innerText = sacola.length;
-  const lista = document.getElementById('listaSacola');
-  lista.innerHTML = '';
-  let total = 0;
-
-  sacola.forEach((item, i) => {
-    total += item.preco;
-    const div = document.createElement('div');
-    div.innerHTML = `${item.nome} - R$ ${item.preco.toFixed(2)} <button onclick="removerSacola(${i})">Remover</button>`;
     lista.appendChild(div);
   });
-
-  document.getElementById('totalSacola').innerText = total.toFixed(2);
 }
+
+let sacola = [];
 
 function adicionarSacola(index) {
+  const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
   const produto = produtos[index];
-  sacola.push(produto);
+
+  const item = sacola.find(p => p.nome === produto.nome);
+  if (item) {
+    item.qtd += 1;
+  } else {
+    sacola.push({ ...produto, qtd: 1 });
+  }
+
   atualizarSacola();
 }
 
-function removerSacola(index) {
-  sacola.splice(index, 1);
-  atualizarSacola();
+function atualizarSacola() {
+  const contador = document.getElementById('contadorSacola');
+  const totalItens = sacola.reduce((s, p) => s + p.qtd, 0);
+  contador.innerText = `Sacola ${totalItens}`;
 }
 
-document.getElementById('sacolaBtn').addEventListener('click', () => {
-  const sacolaEl = document.getElementById('sacola');
-  sacolaEl.style.display = sacolaEl.style.display === 'none' ? 'block' : 'none';
-});
+function abrirSacola() {
+  const div = document.getElementById('sacola');
+  div.innerHTML = '<h3>Sacola</h3>';
+  sacola.forEach((p, i) => {
+    div.innerHTML += `
+      <p>${p.qtd}x ${p.nome} - R$ ${(p.qtd * parseFloat(p.preco)).toFixed(2)}
+      <button onclick="removerItem(${i})">Remover</button></p>
+    `;
+  });
+  div.style.display = 'block';
+}
 
-document.getElementById('enviarWhatsapp').addEventListener('click', () => {
-  if (!sacola.length) {
-    alert('Sua sacola está vazia.');
+function removerItem(i) {
+  sacola.splice(i, 1);
+  atualizarSacola();
+  abrirSacola();
+}
+
+function enviarPedido() {
+  if (sacola.length === 0) {
+    alert('Sua sacola está vazia!');
     return;
   }
 
@@ -74,21 +79,41 @@ document.getElementById('enviarWhatsapp').addEventListener('click', () => {
   const pagamento = document.getElementById('pagamentoCliente').value;
 
   if (!nome || !endereco) {
-    alert('Preencha todos os dados.');
+    alert('Preencha seu nome e endereço!');
     return;
   }
 
-  let mensagem = `Pedido de ${nome}%0A`;
-  mensagem += `Endereço: ${endereco}%0A`;
-  mensagem += `Forma de pagamento: ${pagamento}%0A%0A`;
+  const config = JSON.parse(localStorage.getItem('configLoja')) || {};
+  const numero = config.whatsapp?.replace(/\D/g, '');
 
-  sacola.forEach(item => {
-    mensagem += `🛍️ ${item.nome} - R$ ${item.preco.toFixed(2)}%0A`;
+  if (!numero) {
+    alert('Número do WhatsApp da loja não configurado!');
+    return;
+  }
+
+  let msg = `*Pedido para ${config.nome || 'Minha Loja'}*%0A`;
+  msg += `👤 Nome: ${nome}%0A`;
+  msg += `🏠 Endereço: ${endereco}%0A`;
+  msg += `💳 Pagamento: ${pagamento}%0A`;
+  msg += `%0A🛍️ *Itens:*%0A`;
+
+  let total = 0;
+  sacola.forEach(p => {
+    msg += `- ${p.qtd}x ${p.nome} (R$ ${(p.qtd * parseFloat(p.preco)).toFixed(2)})%0A`;
+    total += p.qtd * parseFloat(p.preco);
   });
 
-  const total = sacola.reduce((acc, item) => acc + item.preco, 0);
-  mensagem += `%0ATotal: R$ ${total.toFixed(2)}`;
+  msg += `%0A💰 *Total:* R$ ${total.toFixed(2)}%0A`;
+  msg += `%0A🕒 Pedido gerado em: ${new Date().toLocaleString('pt-BR')}`;
 
-  const numero = config.whatsapp.replace(/\D/g, '');
-  window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank');
+  const url = `https://wa.me/55${numero}?text=${msg}`;
+  window.open(url, '_blank');
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('nomeLoja')) {
+    carregarConfig();
+    carregarProdutos();
+  }
 });
