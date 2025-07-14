@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1 id="tituloRestaurante">Meu Restaurante</h1>
-    <p id="horarioFuncionamento"></p>
+    <p id="horarioFuncionamento">Funcionamento: <span id="horarioSpan"></span></p>
   </header>
   <main>
     <div id="produtos" class="grid"></div>
@@ -33,6 +33,89 @@
       <button id="enviarWhatsapp">Enviar para WhatsApp</button>
     </section>
   </main>
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tituloRestaurante = document.getElementById('tituloRestaurante');
+      const horarioSpan = document.getElementById('horarioSpan');
+      const dados = JSON.parse(localStorage.getItem('config'));
+
+      if (dados) {
+        tituloRestaurante.textContent = dados.nome || 'Meu Restaurante';
+        horarioSpan.textContent = dados.horario || 'Horário não definido';
+      }
+
+      const produtosContainer = document.getElementById('produtos');
+      const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+      produtos.forEach(produto => {
+        if (produto.pausado) return; // não mostrar produtos pausados
+
+        const card = document.createElement('div');
+        card.classList.add('produto');
+        card.innerHTML = `
+          <img src="${produto.imagem}" alt="${produto.nome}">
+          <h3>${produto.nome}</h3>
+          <p>${produto.descricao}</p>
+          <strong>R$ ${parseFloat(produto.preco).toFixed(2)}</strong>
+          <button onclick="adicionarSacola('${produto.nome}', ${produto.preco})">Adicionar</button>
+        `;
+        produtosContainer.appendChild(card);
+      });
+    });
+
+    let sacola = [];
+    function adicionarSacola(nome, preco) {
+      const index = sacola.findIndex(item => item.nome === nome);
+      if (index > -1) {
+        sacola[index].quantidade++;
+      } else {
+        sacola.push({ nome, preco, quantidade: 1 });
+      }
+      atualizarSacola();
+    }
+
+    function atualizarSacola() {
+      const lista = document.getElementById('listaSacola');
+      const total = document.getElementById('totalSacola');
+      const contador = document.getElementById('contadorSacola');
+
+      lista.innerHTML = '';
+      let soma = 0;
+      sacola.forEach(item => {
+        const div = document.createElement('div');
+        div.innerHTML = `${item.nome} x${item.quantidade} - R$ ${(item.preco * item.quantidade).toFixed(2)} <button onclick="removerItem('${item.nome}')">X</button>`;
+        lista.appendChild(div);
+        soma += item.preco * item.quantidade;
+      });
+
+      total.textContent = soma.toFixed(2);
+      contador.textContent = sacola.reduce((acc, item) => acc + item.quantidade, 0);
+    }
+
+    function removerItem(nome) {
+      sacola = sacola.filter(item => item.nome !== nome);
+      atualizarSacola();
+    }
+
+    document.getElementById('sacolaBtn').addEventListener('click', () => {
+      const sacolaEl = document.getElementById('sacola');
+      sacolaEl.style.display = sacolaEl.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('enviarWhatsapp').addEventListener('click', () => {
+      const nome = document.getElementById('nomeCliente').value;
+      const endereco = document.getElementById('enderecoCliente').value;
+      const pagamento = document.getElementById('pagamentoCliente').value;
+      const dados = JSON.parse(localStorage.getItem('config')) || {};
+      const telefone = dados.whatsapp || '';
+
+      let mensagem = `Pedido de ${nome}%0AEndereço: ${endereco}%0APagamento: ${pagamento}%0A%0A`;
+      sacola.forEach(item => {
+        mensagem += `${item.nome} x${item.quantidade} - R$ ${(item.preco * item.quantidade).toFixed(2)}%0A`;
+      });
+      mensagem += `%0ATotal: R$ ${sacola.reduce((acc, item) => acc + item.preco * item.quantidade, 0).toFixed(2)}`;
+
+      window.open(`https://wa.me/${telefone}?text=${mensagem}`);
+    });
+  </script>
 </body>
 </html>
