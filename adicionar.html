@@ -1,71 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Adicionar Produto</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="navbar">
-    <a href="admin.html">Produtos</a>
-    <a href="adicionar.html" class="ativo">Adicionar Produto</a>
-    <a href="config.html">Configurações</a>
+  <header class="header">
+    <h1>Adicionar Produto</h1>
+  </header>
+  <nav class="nav">
+    <button onclick="location.href='admin.html'">Produtos</button>
+    <button onclick="location.href='adicionar.html'">Adicionar Produto</button>
+    <button onclick="location.href='config.html'">Configurações</button>
   </nav>
 
-  <main>
-    <section class="secao" id="secao-adicionar" style="display: block;">
-      <h2>Adicionar Produto</h2>
-      <form id="form-produto">
-        <label for="nomeProduto">Nome do Produto</label>
-        <input type="text" id="nomeProduto" required />
-
-        <label for="descricaoProduto">Descrição</label>
-        <textarea id="descricaoProduto" required></textarea>
-
-        <label for="precoProduto">Preço</label>
-        <input type="text" id="precoProduto" required />
-
-        <label for="imagemProduto">Imagem do Produto</label>
-        <input type="file" id="imagemProduto" accept="image/*" required />
-
-        <button type="submit">Salvar Produto</button>
-      </form>
-    </section>
-  </main>
+  <section class="formulario">
+    <label>Nome do Produto</label>
+    <input type="text" id="nome">
+    <label>Descrição</label>
+    <textarea id="descricao"></textarea>
+    <label>Preço</label>
+    <input type="text" id="preco">
+    <label>Imagem do Produto</label>
+    <input type="file" id="imagem" accept="image/*">
+    <button onclick="salvarProduto()">Salvar Produto</button>
+  </section>
 
   <script>
-    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    function salvarProduto() {
+      const nome = document.getElementById('nome').value.trim();
+      const descricao = document.getElementById('descricao').value.trim();
+      const preco = document.getElementById('preco').value.trim();
+      const imagem = document.getElementById('imagem').files[0];
 
-    document.getElementById('form-produto').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const nome = document.getElementById('nomeProduto').value.trim();
-      const descricao = document.getElementById('descricaoProduto').value.trim();
-      const precoInput = document.getElementById('precoProduto').value.trim().replace(',', '.');
-      const preco = parseFloat(precoInput);
-      const imagemInput = document.getElementById('imagemProduto');
-
-      if (!nome || !descricao || isNaN(preco) || !imagemInput.files.length) {
-        alert('Preencha todos os campos corretamente.');
+      if (!nome || !descricao || !preco || !imagem) {
+        alert('Preencha todos os campos!');
         return;
       }
 
       const reader = new FileReader();
       reader.onload = function () {
-        produtos.push({
+        const novoProduto = {
           nome,
           descricao,
           preco,
           imagem: reader.result,
           pausado: false
-        });
+        };
+        const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+        produtos.push(novoProduto);
         localStorage.setItem('produtos', JSON.stringify(produtos));
         alert('Produto adicionado com sucesso!');
-        window.location.href = 'admin.html';
+        location.href = 'admin.html';
       };
-      reader.readAsDataURL(imagemInput.files[0]);
-    });
+      reader.readAsDataURL(imagem);
+    }
   </script>
 </body>
 </html>
