@@ -1,29 +1,180 @@
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f8f8; }
+/* Reset básico */
+body, h1, h2, h3, p, ul, li, input, select, button {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
 
-header, nav { background-color: #ff4d4d; color: white; padding: 15px; text-align: center; }
+/* Corpo */
+body {
+  background: #f9f9f9;
+  padding: 10px;
+}
 
-.navbar { display: flex; justify-content: space-around; background-color: #ff4d4d; padding: 10px; }
+/* Cabeçalho */
+header {
+  text-align: center;
+  background-color: #ff4d4d;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
 
-.navbar a { color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; border-radius: 6px; }
+header h1 {
+  font-size: 28px;
+}
 
-.navbar a.ativo, .navbar a:hover { background-color: #ff3333; }
+header p {
+  font-size: 16px;
+}
 
-main { padding: 20px; }
+/* Grid de produtos */
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  margin-bottom: 80px;
+}
 
-.card-produto { background: white; padding: 10px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+/* Card do produto */
+.produto {
+  background: white;
+  border-radius: 15px;
+  padding: 10px;
+  box-shadow: 0 0 10px #ddd;
+  text-align: center;
+  transition: transform 0.2s;
+}
 
-.card-produto img { width: 100%; max-width: 250px; border-radius: 10px; }
+.produto img {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+}
 
-.card-produto button { background-color: #ff4d4d; color: white; border: none; padding: 8px 12px; margin-top: 10px; border-radius: 6px; cursor: pointer; }
+.produto h3 {
+  font-size: 18px;
+  margin: 8px 0 4px;
+}
 
-#sacola-btn { position: fixed; bottom: 15px; right: 15px; background-color: #ff4d4d; color: white; padding: 15px; border-radius: 50%; font-size: 24px; cursor: pointer; z-index: 1000; }
+.produto p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+}
 
-.sacola { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); padding: 20px; display: flex; flex-direction: column; gap: 10px; max-height: 80vh; overflow-y: auto; z-index: 999; }
+.produto strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
 
-.sacola.escondida { display: none; }
+/* Botão de adicionar */
+.produto button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
 
-input, textarea, select, button { width: 100%; margin-top: 5px; margin-bottom: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+.produto button:hover {
+  background-color: #e64444;
+}
 
-.produto { background: white; margin: 10px 0; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+/* Botão da sacola */
+#sacolaBtn {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 18px;
+  font-size: 14px;
+  box-shadow: 0 0 10px #999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 999;
+}
 
-.produto img { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; }
+#sacolaBtn img {
+  width: 20px;
+}
+
+/* Sacola (carrinho) */
+#sacola {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 10px #ccc;
+  margin-top: 20px;
+  animation: aparecer 0.3s ease-out;
+}
+
+#listaSacola div {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#listaSacola button {
+  background: none;
+  border: none;
+  color: #ff4d4d;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+input, select {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+#enviarWhatsapp {
+  margin-top: 12px;
+  width: 100%;
+  background-color: #25d366;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#enviarWhatsapp:hover {
+  background-color: #1ebe5d;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .produto img {
+    max-height: 120px;
+  }
+
+  #sacolaBtn {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+}
