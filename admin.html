@@ -1,73 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administração</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-    }
-    header {
-      background-color: #ff4d4d;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-    }
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      background-color: #ff4d4d;
-      padding: 0.5rem;
-    }
-    nav button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: white;
-      color: #ff4d4d;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    section {
-      padding: 1rem;
-    }
-    .produto {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    .produto img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    .botoes {
-      margin-top: 0.5rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-    .botoes button {
-      flex: 1;
-      padding: 0.4rem;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      font-weight: bold;
-    }
-    .btn-pausar { background-color: #ffa500; }
-    .btn-excluir { background-color: #ff4d4d; }
-  </style>
+  <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
   <header>
@@ -75,17 +13,36 @@
   </header>
 
   <nav>
-    <button onclick="location.href='admin.html'">Produtos</button>
-    <button onclick="location.href='adicionar.html'">Adicionar Produto</button>
-    <button onclick="location.href='config.html'">Configurações</button>
+    <button onclick="mostrarSecao('produtos')">Produtos</button>
+    <button onclick="mostrarSecao('adicionar')">Adicionar Produto</button>
+    <button onclick="mostrarSecao('config')">Configurações</button>
   </nav>
 
-  <section>
-    <h2>Produtos</h2>
-    <div id="listaProdutos"></div>
-  </section>
+  <main>
+    <section id="secao-produtos" class="secao">
+      <h2>Produtos Cadastrados</h2>
+      <div id="lista-produtos"></div>
+    </section>
 
-  <!-- Scripts -->
-  <script src="admin.js"></script>
+    <section id="secao-adicionar" class="secao" style="display: none;">
+      <h2>Adicionar Produto</h2>
+      <form id="form-produto">
+        <input type="text" id="nomeProduto" placeholder="Nome do produto" required />
+        <textarea id="descricaoProduto" placeholder="Descrição" required></textarea>
+        <input type="number" id="precoProduto" placeholder="Preço" step="0.01" required />
+        <input type="file" id="imagemProduto" accept="image/*" required />
+        <button type="submit">Salvar Produto</button>
+      </form>
+    </section>
+
+    <section id="secao-config" class="secao" style="display: none;">
+      <h2>Configurações</h2>
+      <input type="text" id="nomeEstabelecimento" placeholder="Nome do restaurante" />
+      <input type="text" id="whatsEstabelecimento" placeholder="Número WhatsApp com DDD" />
+      <button onclick="salvarConfig()">Salvar Configurações</button>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
