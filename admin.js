@@ -1,113 +1,35 @@
-// admin.js
-let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-let config = JSON.parse(localStorage.getItem('config')) || {
-  nome: 'Meu Restaurante',
-  whatsapp: ''
-};
-
-function mostrarSecao(secao) {
-  document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
-  document.getElementById(`secao-${secao}`).style.display = 'block';
-  if (secao === 'produtos') renderizarProdutos();
-  if (secao === 'config') carregarConfiguracoes();
-}
-
-function renderizarProdutos() {
-  const container = document.getElementById('lista-produtos');
-  if (!container) return;
-  container.innerHTML = '';
-
-  produtos.forEach((produto, index) => {
-    const div = document.createElement('div');
-    div.className = 'produto';
-    div.innerHTML = `
-      <img src="${produto.imagem || ''}" width="80" />
-      <div>
-        <strong>${produto.nome}</strong><br>
-        ${produto.descricao || ''}<br>
-        <strong>R$ ${produto.preco.toFixed(2)}</strong>
-      </div>
-      <div>
-        <button onclick="pausarProduto(${index})">${produto.pausado ? 'Ativar' : 'Pausar'}</button>
-        <button onclick="excluirProduto(${index})">Excluir</button>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-}
-
-function pausarProduto(index) {
-  produtos[index].pausado = !produtos[index].pausado;
-  salvarProdutos();
-  renderizarProdutos();
-}
-
-function excluirProduto(index) {
-  if (confirm('Tem certeza que deseja excluir?')) {
-    produtos.splice(index, 1);
-    salvarProdutos();
-    renderizarProdutos();
-  }
-}
-
-function salvarProdutos() {
-  localStorage.setItem('produtos', JSON.stringify(produtos));
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const formProduto = document.getElementById('form-produto');
-  if (formProduto) {
-    formProduto.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const nome = document.getElementById('nomeProduto').value.trim();
-      const descricao = document.getElementById('descricaoProduto').value.trim();
-      const preco = parseFloat(document.getElementById('precoProduto').value);
-      const imagemInput = document.getElementById('imagemProduto');
-
-      if (!imagemInput.files.length) {
-        alert('Escolha uma imagem.');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function () {
-        produtos.push({
-          nome,
-          descricao,
-          preco,
-          imagem: reader.result,
-          pausado: false
-        });
-        salvarProdutos();
-        formProduto.reset();
-        mostrarSecao('produtos');
-      };
-      reader.readAsDataURL(imagemInput.files[0]);
-    });
-  }
-
-  const formConfig = document.getElementById('form-config');
-  if (formConfig) {
-    formConfig.addEventListener('submit', function (e) {
-      e.preventDefault();
-      config.nome = document.getElementById('nomeEstabelecimento').value.trim();
-      config.whatsapp = document.getElementById('numeroWhatsapp').value.trim();
-      localStorage.setItem('config', JSON.stringify(config));
-      alert('Configurações salvas com sucesso.');
-    });
-  }
-
-  mostrarSecao('produtos');
+// Firebase SDK (garanta que o HTML carregue firebase-app.js e firebase-firestore.js)
+firebase.initializeApp({
+  apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
+  authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
+  projectId: "meu-pedido-online-c2ff1",
+  storageBucket: "meu-pedido-online-c2ff1.appspot.com",
+  messagingSenderId: "949953908074",
+  appId: "1:949953908074:web:8f34ddb9af67a07db1a913",
+  measurementId: "G-B99PGCNDTT"
 });
+const db = firebase.firestore();
 
-function carregarConfiguracoes() {
-  if (document.getElementById('nomeEstabelecimento')) {
-    document.getElementById('nomeEstabelecimento').value = config.nome || '';
-    document.getElementById('numeroWhatsapp').value = config.whatsapp || '';
-  }
-}
+document.getElementById('form-produto').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const nome = nomeProduto.value;
+  const descricao = descricaoProduto.value;
+  const preco = parseFloat(precoProduto.value);
+  const imagemInput = imagemProduto;
 
-function obterConfiguracoes() {
-  return config;
-}
+  const reader = new FileReader();
+  reader.onload = () => {
+    db.collection("produtos").add({
+      nome,
+      descricao,
+      preco,
+      imagem: reader.result,
+      pausado: false
+    }).then(() => {
+      alert("Produto salvo!");
+      form-produto.reset();
+      window.location.href = "admin.html";
+    });
+  };
+  if (imagemInput.files[0]) reader.readAsDataURL(imagemInput.files[0]);
+});
