@@ -5,36 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cardápio Online</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
   <header>
     <h1 id="nomeRestaurante">Meu Restaurante</h1>
   </header>
+  
+  <main id="cardapio"></main>
 
-  <main id="cardapio" class="cardapio">
-    <p>Carregando cardápio...</p>
-  </main>
-
-  <div class="sacola-flutuante" id="sacolaFlutuante">
-    <button onclick="abrirSacola()">🛒 Sacola (<span id="quantidade-sacola">0</span>)</button>
-  </div>
-
-  <div id="sacola" class="sacola" style="display: none;">
-    <h2>Sua Sacola</h2>
-    <div id="itens-sacola"></div>
-    <hr />
-    <label>Nome:</label><input id="nomeCliente" />
-    <label>Endereço:</label><input id="enderecoCliente" />
-    <label>Forma de Pagamento:</label><input id="pagamentoCliente" />
-    <button onclick="enviarPedido()">Enviar pelo WhatsApp</button>
+  <div id="sacola" class="sacola escondida">
+    <h3>Sacola</h3>
+    <ul id="listaSacola"></ul>
+    <input type="text" id="nomeCliente" placeholder="Seu nome" required />
+    <input type="text" id="enderecoCliente" placeholder="Endereço" required />
+    <select id="formaPagamento">
+      <option>Pix</option>
+      <option>Crédito</option>
+      <option>Débito</option>
+      <option>Dinheiro</option>
+    </select>
+    <button onclick="enviarPedido()">Finalizar Pedido via WhatsApp</button>
     <button onclick="esvaziarSacola()">Esvaziar Sacola</button>
   </div>
 
-  <!-- Scripts -->
-  <script src="script.js"></script>
+  <button class="icone-carrinho" onclick="toggleSacola()">🛒</button>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
