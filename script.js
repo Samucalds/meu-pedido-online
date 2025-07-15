@@ -1,101 +1,108 @@
-// Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
-  authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
-  projectId: "meu-pedido-online-c2ff1",
-  storageBucket: "meu-pedido-online-c2ff1.appspot.com",
-  messagingSenderId: "949953908074",
-  appId: "1:949953908074:web:8f34ddb9af67a07db1a913",
-  measurementId: "G-B99PGCNDTT"
-};
+// Importar do firebase-config.js
+import { db } from './firebase-config.js';
+import { collection, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+let carrinho = [];
 
-// Sacola
-let sacola = JSON.parse(localStorage.getItem('sacola')) || [];
-
-function salvarSacola() {
-  localStorage.setItem('sacola', JSON.stringify(sacola));
-  document.getElementById("quantidade-sacola").innerText = sacola.length;
-}
-
-function renderizarProdutos(produtos) {
-  const container = document.getElementById('cardapio');
+// Buscar produtos do Firestore em tempo real
+function carregarProdutos() {
+  const container = document.getElementById('lista-produtos');
   container.innerHTML = '';
-  produtos.forEach(prod => {
-    if (prod.pausado) return;
-    const item = document.createElement('div');
-    item.className = 'produto';
-    item.innerHTML = `
-      <img src="${prod.imagem}" alt="${prod.nome}" style="width: 100%; border-radius: 8px;">
-      <h3>${prod.nome}</h3>
-      <p>${prod.descricao}</p>
-      <strong>R$ ${parseFloat(prod.preco).toFixed(2)}</strong><br>
-      <button onclick='adicionarSacola(${JSON.stringify(prod)})'>Adicionar</button>
-    `;
-    container.appendChild(item);
+
+  onSnapshot(collection(db, 'produtos'), (snapshot) => {
+    container.innerHTML = '';
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      if (!p.pausado) {
+        const div = document.createElement('div');
+        div.className = 'produto';
+        div.innerHTML = `
+          <img src="${p.imagem}" alt="${p.nome}">
+          <h3>${p.nome}</h3>
+          <p>${p.descricao}</p>
+          <strong>R$ ${parseFloat(p.preco).toFixed(2)}</strong><br>
+          <button onclick="adicionarAoCarrinho('${p.nome}', ${p.preco})">Adicionar à sacola</button>
+        `;
+        container.appendChild(div);
+      }
+    });
   });
 }
 
-function adicionarSacola(produto) {
-  sacola.push(produto);
-  salvarSacola();
-  alert('Adicionado à sacola!');
-}
-
-function abrirSacola() {
-  const div = document.getElementById('sacola');
-  div.style.display = div.style.display === 'none' ? 'block' : 'none';
+// Adiciona item à sacola
+window.adicionarAoCarrinho = function(nome, preco) {
+  carrinho.push({ nome, preco });
   atualizarSacola();
+  abrirSacola();
 }
 
+// Atualiza o conteúdo da sacola
 function atualizarSacola() {
   const lista = document.getElementById('itens-sacola');
+  const totalSpan = document.getElementById('total-sacola');
   lista.innerHTML = '';
-  sacola.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.innerHTML = `${item.nome} - R$ ${parseFloat(item.preco).toFixed(2)} <button onclick="removerItem(${i})">❌</button>`;
-    lista.appendChild(div);
+
+  let total = 0;
+  carrinho.forEach((item, i) => {
+    total += item.preco;
+    const li = document.createElement('li');
+    li.innerHTML = `${item.nome} - R$ ${item.preco.toFixed(2)} <button onclick="removerItem(${i})">x</button>`;
+    lista.appendChild(li);
   });
+
+  totalSpan.textContent = total.toFixed(2);
+  document.getElementById('sacola-vazia').style.display = carrinho.length === 0 ? 'block' : 'none';
 }
 
-function removerItem(i) {
-  sacola.splice(i, 1);
-  salvarSacola();
+// Remove item da sacola
+window.removerItem = function(index) {
+  carrinho.splice(index, 1);
   atualizarSacola();
 }
 
-function esvaziarSacola() {
-  sacola = [];
-  salvarSacola();
-  atualizarSacola();
-}
-
-function enviarPedido() {
-  if (sacola.length === 0) {
+// Finaliza pedido e envia para WhatsApp
+window.finalizarPedido = function() {
+  if (carrinho.length === 0) {
     alert('Sua sacola está vazia!');
     return;
   }
-  const nome = document.getElementById('nomeCliente').value;
-  const endereco = document.getElementById('enderecoCliente').value;
-  const pagamento = document.getElementById('pagamentoCliente').value;
 
-  let texto = `*Pedido:*%0A`;
-  sacola.forEach((p, i) => {
-    texto += `${i + 1}. ${p.nome} - R$ ${parseFloat(p.preco).toFixed(2)}%0A`;
+  const nome = document.getElementById('nomeCliente').value.trim();
+  const endereco = document.getElementById('enderecoCliente').value.trim();
+  const pagamento = document.getElementById('pagamentoCliente').value.trim();
+
+  if (!nome || !endereco || !pagamento) {
+    alert('Por favor, preencha todos os campos.');
+    return;
+  }
+
+  let mensagem = `📦 *Novo Pedido de ${nome}*\n\n`;
+  carrinho.forEach(item => {
+    mensagem += `• ${item.nome} - R$ ${item.preco.toFixed(2)}\n`;
   });
-  texto += `%0A*Nome:* ${nome}%0A*Endereço:* ${endereco}%0A*Pagamento:* ${pagamento}`;
 
-  const numero = 'SEUNUMEROAQUI'; // substitua pelo seu número com DDI (ex: 5581999999999)
-  window.open(`https://wa.me/${numero}?text=${texto}`, '_blank');
+  let total = carrinho.reduce((acc, item) => acc + item.preco, 0);
+  mensagem += `\n💰 *Total:* R$ ${total.toFixed(2)}\n\n`;
+  mensagem += `📍 *Endereço:* ${endereco}\n💳 *Pagamento:* ${pagamento}`;
+
+  const numero = localStorage.getItem('whatsapp') || '5599999999999'; // número padrão
+  const link = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+  window.open(link, '_blank');
 }
 
-// Carregar produtos do Firestore
-firebase.firestore().collection('produtos').onSnapshot(snapshot => {
-  const produtos = [];
-  snapshot.forEach(doc => produtos.push(doc.data()));
-  renderizarProdutos(produtos);
-});
+// Abrir e fechar sacola
+function abrirSacola() {
+  document.getElementById('sacola').classList.add('aberta');
+}
+window.toggleSacola = function() {
+  document.getElementById('sacola').classList.toggle('aberta');
+}
+window.esvaziarCarrinho = function() {
+  carrinho = [];
+  atualizarSacola();
+}
 
-salvarSacola();
+document.addEventListener('DOMContentLoaded', () => {
+  carregarProdutos();
+  atualizarSacola();
+});
