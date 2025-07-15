@@ -5,32 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cardápio Online</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
   <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
   <header>
     <h1 id="nomeRestaurante">Meu Restaurante</h1>
   </header>
-  
+
   <main id="cardapio"></main>
 
-  <div id="sacola" class="sacola escondida">
+  <div id="sacola" class="sacola">
     <h3>Sacola</h3>
     <ul id="listaSacola"></ul>
     <input type="text" id="nomeCliente" placeholder="Seu nome" required />
     <input type="text" id="enderecoCliente" placeholder="Endereço" required />
-    <select id="formaPagamento">
+    <select id="pagamentoCliente">
       <option>Pix</option>
       <option>Crédito</option>
       <option>Débito</option>
       <option>Dinheiro</option>
     </select>
-    <button onclick="enviarPedido()">Finalizar Pedido via WhatsApp</button>
-    <button onclick="esvaziarSacola()">Esvaziar Sacola</button>
+    <button onclick="finalizarPedido()">Enviar Pedido</button>
+    <button onclick="esvaziarSacola()">Esvaziar</button>
   </div>
 
-  <button class="icone-carrinho" onclick="toggleSacola()">🛒</button>
-
+  <button id="icone-carrinho" onclick="toggleSacola()">🛒</button>
   <script type="module" src="script.js"></script>
 </body>
 </html>
