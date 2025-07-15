@@ -1,48 +1,55 @@
-// Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
-  authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
-  projectId: "meu-pedido-online-c2ff1",
-  storageBucket: "meu-pedido-online-c2ff1.appspot.com",
-  messagingSenderId: "949953908074",
-  appId: "1:949953908074:web:8f34ddb9af67a07db1a913",
-  measurementId: "G-B99PGCNDTT"
-};
+import { db, collection, addDoc, getDocs } from './firebase-config.js';
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const form = document.getElementById('form-produto');
+const lista = document.getElementById('lista-produtos');
 
-function carregarProdutos() {
-  const container = document.getElementById('listaProdutos');
-  db.collection("produtos").get().then(snapshot => {
-    container.innerHTML = '';
-    snapshot.forEach(doc => {
-      const p = doc.data();
-      const div = document.createElement('div');
-      div.className = 'produto';
-      div.innerHTML = `
-        <img src="${p.imagem}" alt="${p.nome}">
-        <h3>${p.nome}</h3>
-        <p>${p.descricao}</p>
-        <strong>R$ ${parseFloat(p.preco).toFixed(2)}</strong>
-        <div class="botoes">
-          <button class="btn-pausar" onclick="alternarPausado('${doc.id}', ${p.pausado})">${p.pausado ? 'Ativar' : 'Pausar'}</button>
-          <button class="btn-excluir" onclick="excluirProduto('${doc.id}')">Excluir</button>
-        </div>
-      `;
-      container.appendChild(div);
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const nome = document.getElementById('nomeProduto').value;
+  const descricao = document.getElementById('descricaoProduto').value;
+  const preco = parseFloat(document.getElementById('precoProduto').value);
+  const imagemInput = document.getElementById('imagemProduto');
+
+  const reader = new FileReader();
+  reader.onload = async function () {
+    const imagemBase64 = reader.result;
+    await addDoc(collection(db, "produtos"), {
+      nome,
+      descricao,
+      preco,
+      imagem: imagemBase64,
+      pausado: false
     });
+    alert("Produto adicionado com sucesso!");
+    form.reset();
+    mostrarSecao('produtos');
+    renderizarProdutos();
+  };
+  reader.readAsDataURL(imagemInput.files[0]);
+});
+
+async function renderizarProdutos() {
+  lista.innerHTML = '';
+  const querySnapshot = await getDocs(collection(db, "produtos"));
+  querySnapshot.forEach((doc) => {
+    const produto = doc.data();
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <img src="${produto.imagem}" width="80" />
+      <div>
+        <strong>${produto.nome}</strong><br>
+        ${produto.descricao}<br>
+        R$ ${produto.preco.toFixed(2)}
+      </div>
+    `;
+    lista.appendChild(div);
   });
 }
 
-function excluirProduto(id) {
-  if (confirm('Deseja excluir este produto?')) {
-    db.collection('produtos').doc(id).delete().then(carregarProdutos);
-  }
+function mostrarSecao(secao) {
+  document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
+  document.getElementById(`secao-${secao}`).style.display = 'block';
 }
 
-function alternarPausado(id, pausadoAtual) {
-  db.collection('produtos').doc(id).update({ pausado: !pausadoAtual }).then(carregarProdutos);
-}
-
-document.addEventListener('DOMContentLoaded', carregarProdutos);
+document.addEventListener('DOMContentLoaded', renderizarProdutos);
