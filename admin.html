@@ -1,48 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin</title>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Administrativo</title>
   <link rel="stylesheet" href="style.css" />
   <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Área Administrativa</h1>
-  </header>
-
+  <header><h1>Área Administrativa</h1></header>
   <nav>
     <button onclick="mostrarSecao('produtos')">Produtos</button>
     <button onclick="mostrarSecao('adicionar')">Adicionar Produto</button>
     <button onclick="mostrarSecao('config')">Configurações</button>
   </nav>
-
   <main>
     <section id="secao-produtos" class="secao">
       <h2>Produtos Cadastrados</h2>
       <div id="lista-produtos"></div>
     </section>
-
-    <section id="secao-adicionar" class="secao" style="display: none;">
+    <section id="secao-adicionar" class="secao" style="display:none">
       <h2>Adicionar Produto</h2>
       <form id="form-produto">
-        <input type="text" id="nomeProduto" placeholder="Nome do produto" required />
+        <input type="text" id="nomeProduto" placeholder="Nome" required />
         <textarea id="descricaoProduto" placeholder="Descrição" required></textarea>
-        <input type="number" id="precoProduto" placeholder="Preço" step="0.01" required />
+        <input type="number" id="precoProduto" placeholder="Preço" step="0.01" required/>
         <input type="file" id="imagemProduto" accept="image/*" required />
         <button type="submit">Salvar Produto</button>
       </form>
     </section>
-
-    <section id="secao-config" class="secao" style="display: none;">
+    <section id="secao-config" class="secao" style="display:none">
       <h2>Configurações</h2>
-      <input type="text" id="nomeEstabelecimento" placeholder="Nome do restaurante" />
-      <input type="text" id="whatsEstabelecimento" placeholder="Número WhatsApp com DDD" />
+      <input type="text" id="nomeEstabelecimento" placeholder="Nome do Restaurante" />
+      <input type="text" id="whatsEstabelecimento" placeholder="WhatsApp com DDD" />
       <button onclick="salvarConfig()">Salvar Configurações</button>
     </section>
   </main>
-
   <script type="module" src="admin.js"></script>
 </body>
 </html>
