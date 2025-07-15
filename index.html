@@ -3,36 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cardápio</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Cardápio Online</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
 </head>
 <body>
-  <header class="header">
-    <h1 id="nomeLoja">Meu Restaurante</h1>
-    <p id="statusLoja">Funcionamento: --</p>
+  <header>
+    <h1 id="nomeRestaurante">Meu Restaurante</h1>
   </header>
 
-  <main id="produtos" class="produtos"></main>
+  <main id="cardapio" class="cardapio">
+    <p>Carregando cardápio...</p>
+  </main>
 
-  <div class="sacola-btn" onclick="abrirSacola()">
-    <img src="sacola.png" alt="Sacola">
-    <span id="contadorSacola">Sacola 0</span>
+  <div class="sacola-flutuante" id="sacolaFlutuante">
+    <button onclick="abrirSacola()">🛒 Sacola (<span id="quantidade-sacola">0</span>)</button>
   </div>
 
-  <div id="sacola" class="sacola"></div>
+  <div id="sacola" class="sacola" style="display: none;">
+    <h2>Sua Sacola</h2>
+    <div id="itens-sacola"></div>
+    <hr />
+    <label>Nome:</label><input id="nomeCliente" />
+    <label>Endereço:</label><input id="enderecoCliente" />
+    <label>Forma de Pagamento:</label><input id="pagamentoCliente" />
+    <button onclick="enviarPedido()">Enviar pelo WhatsApp</button>
+    <button onclick="esvaziarSacola()">Esvaziar Sacola</button>
+  </div>
 
-  <footer class="finalizar">
-    <h2>Finalizar Pedido</h2>
-    <input type="text" id="nomeCliente" placeholder="Seu nome">
-    <input type="text" id="enderecoCliente" placeholder="Endereço completo">
-    <select id="pagamentoCliente">
-      <option value="Pix">Pix</option>
-      <option value="Dinheiro">Dinheiro</option>
-      <option value="Cartão">Cartão</option>
-    </select>
-    <button onclick="enviarPedido()">Enviar para WhatsApp</button>
-  </footer>
-
+  <!-- Scripts -->
   <script src="script.js"></script>
 </body>
 </html>
