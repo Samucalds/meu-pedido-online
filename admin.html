@@ -1,40 +1,53 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Painel Administrativo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Admin</title>
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
-  <header><h1>Área Administrativa</h1></header>
-  <nav>
-    <button onclick="mostrarSecao('produtos')">Produtos</button>
-    <button onclick="mostrarSecao('adicionar')">Adicionar Produto</button>
-    <button onclick="mostrarSecao('config')">Configurações</button>
-  </nav>
+  <header class="admin-header">
+    <h1>Área Administrativa</h1>
+    <nav>
+      <button onclick="mostrarSecao('produtos')">Produtos</button>
+      <button onclick="mostrarSecao('adicionar')">Adicionar Produto</button>
+      <button onclick="mostrarSecao('config')">Configurações</button>
+    </nav>
+  </header>
+
   <main>
     <section id="secao-produtos" class="secao">
       <h2>Produtos Cadastrados</h2>
       <div id="lista-produtos"></div>
     </section>
+
     <section id="secao-adicionar" class="secao" style="display:none">
       <h2>Adicionar Produto</h2>
       <form id="form-produto">
-        <input type="text" id="nomeProduto" placeholder="Nome" required />
-        <textarea id="descricaoProduto" placeholder="Descrição" required></textarea>
-        <input type="number" id="precoProduto" placeholder="Preço" step="0.01" required/>
-        <input type="file" id="imagemProduto" accept="image/*" required />
+        <label>Nome do Produto</label>
+        <input type="text" id="nomeProduto" required/>
+
+        <label>Descrição</label>
+        <textarea id="descricaoProduto" required></textarea>
+
+        <label>Preço</label>
+        <input type="number" id="precoProduto" step="0.01" required/>
+
+        <label>Imagem do Produto</label>
+        <input type="file" id="imagemProduto" accept="image/*" required/>
+
         <button type="submit">Salvar Produto</button>
       </form>
     </section>
+
     <section id="secao-config" class="secao" style="display:none">
       <h2>Configurações</h2>
-      <input type="text" id="nomeEstabelecimento" placeholder="Nome do Restaurante" />
-      <input type="text" id="whatsEstabelecimento" placeholder="WhatsApp com DDD" />
-      <button onclick="salvarConfig()">Salvar Configurações</button>
+      <p>A adicionar...</p>
     </section>
   </main>
+
+  <script type="module" src="firebase-config.js"></script>
   <script type="module" src="admin.js"></script>
 </body>
 </html>
