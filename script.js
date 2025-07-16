@@ -1,54 +1,85 @@
-import { db } from './firebase-config.js';
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// Carrega Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-let carrinho = [];
+const firebaseConfig = { /* seu config aqui */ };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-onSnapshot(collection(db, 'produtos'), snapshot => {
-  const cardapio = document.getElementById('cardapio');
-  cardapio.innerHTML = '';
-  snapshot.forEach(docSnap => {
-    const p = docSnap.data();
+// Carrega configurações
+const nomeRest = document.getElementById('nomeRestaurante');
+const horarioRest = document.getElementById('horarioRestaurante');
+const logoEl = document.getElementById('logoRestaurante');
+onValue(ref(db, 'config/'), snap => {
+  const conf = snap.val() || {};
+  nomeRest.textContent = conf.nome || "Meu Restaurante";
+  horarioRest.textContent = `Horário: ${conf.horario || "--:-- às --:--"}`;
+  if (conf.logo) {
+    logoEl.src = conf.logo;
+    logoEl.style.display = 'inline-block';
+  }
+});
+
+// Carrega produtos
+const container = document.getElementById('container-produtos');
+onValue(ref(db, 'produtos/'), snap => {
+  const data = snap.val() || {};
+  container.innerHTML = '';
+  Object.entries(data).forEach(([id, p]) => {
     if (!p.pausado) {
       const div = document.createElement('div');
-      div.className = 'produto';
+      div.className = 'card';
       div.innerHTML = `
-        <img src="${p.imagem}" alt="${p.nome}" />
-        <h3>${p.nome}</h3><p>${p.descricao}</p><strong>R$ ${p.preco.toFixed(2)}</strong>
-        <button onclick="adicionarAoCarrinho('${p.nome}', ${p.preco})">Adicionar</button>
-      `;
-      cardapio.appendChild(div);
+        <img src="${p.imagem}" />
+        <h3>${p.nome}</h3>
+        <p>${p.descricao}</p>
+        <strong>R$ ${p.preco.toFixed(2)}</strong>
+        <button class="btn-adicionar" data-id="${id}">Adicionar</button>`;
+      container.appendChild(div);
+      div.querySelector('.btn-adicionar').onclick = () => adicionarCarrinho(id, p);
     }
   });
 });
 
-window.adicionarAoCarrinho = (nome, preco) => {
-  carrinho.push({ nome, preco });
+// Carrinho
+let carrinho = JSON.parse(localStorage.getItem('carrinho')) || {};
+function adicionarCarrinho(id, p) {
+  carrinho[id] = carrinho[id] + 1 || 1;
+  localStorage.setItem('carrinho', JSON.stringify(carrinho));
   atualizarCarrinho();
-};
-
+}
 function atualizarCarrinho() {
-  document.getElementById('listaSacola').innerHTML = '';
+  const totalEl = document.getElementById('contador-sacola');
+  const count = Object.values(carrinho).reduce((a,b)=>a+b,0);
+  totalEl.textContent = count;
+}
+atualizarCarrinho();
+
+// Carrinho popup
+const botaoCarrinho = document.getElementById('botao-carrinho');
+const painel = document.getElementById('painel-carrinho');
+botaoCarrinho.onclick = () => painel.classList.toggle('mostrar');
+
+function mostrarItensCarrinho() {
+  const cont = document.getElementById('itens-carrinho');
+  cont.innerHTML = '';
   let total = 0;
-  carrinho.forEach((item, i) => {
-    total += item.preco;
-    document.getElementById('listaSacola').innerHTML += `
-      <li>${item.nome} - R$${item.preco.toFixed(2)}
-      <button onclick="removerItem(${i})">x</button></li>`;
+  Object.entries(carrinho).forEach(([id, qty]) => {
+    onValue(ref(db, `produtos/${id}`), snap => {
+      const p = snap.val();
+      if (p) {
+        cont.innerHTML += `<p>${p.nome} x ${qty} = R$ ${(p.preco * qty).toFixed(2)}</p>`;
+        total += p.preco * qty;
+      }
+      document.getElementById('total-carrinho').textContent = total.toFixed(2);
+    }, {onlyOnce:true});
   });
-  document.getElementById('quantidade-sacola').innerText = carrinho.length;
-  document.getElementById('total-sacola').innerText = total.toFixed(2);
 }
 
-window.removerItem = i => { carrinho.splice(i,1); atualizarCarrinho(); };
-window.esvaziarSacola = () => { carrinho = []; atualizarCarrinho(); };
-window.toggleSacola = () => document.getElementById('sacola').classList.toggle('aberta');
-window.finalizarPedido = () => {
-  if (!carrinho.length) return alert('Sacola vazia!');
-  const nome = nomeCliente.value.trim(), endereco = enderecoCliente.value.trim(), pag = pagamentoCliente.value;
-  if (!nome || !endereco) return alert('Preencha nome e endereço!');
-  let text = `Pedido de ${nome}%0A`;
-  carrinho.forEach(item => { text += `${item.nome} - R$${item.preco.toFixed(2)}%0A`; });
-  text += `%0APagamento: ${pag}%0AEnd: ${endereco}`;
-  const numero = localStorage.getItem('whatsapp') || '5599999999999';
-  window.open(`https://wa.me/${numero}?text=${encodeURIComponent(text)}`, '_blank');
+// Lógica de enviar para WhatsApp
+document.getElementById('enviar-whatsapp').onclick = () => {
+  // verifica campos, monta mensagem...
 };
+
+// Atualiza carrinho exibido
+setInterval(mostrarItensCarrinho, 1000);
