@@ -1,73 +1,87 @@
-// admin.js
-import { db } from './firebase-config.js';
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  updateDoc,
-  deleteDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-window.mostrarSecao = function(sec) {
-  document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
-  document.getElementById(`secao-${sec}`).style.display = 'block';
-};
+const firebaseConfig = { /* mesmo config do index.js */ };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-function renderizarProdutos(snapshot) {
-  const lista = document.getElementById('lista-produtos');
-  lista.innerHTML = '';
-  snapshot.forEach(docSnap => {
-    const p = docSnap.data();
+// Elementos
+const abas = document.querySelectorAll('.tab-btn');
+const conteudos = document.querySelectorAll('.tab-conteudo');
+const listaProdutos = document.getElementById('lista-produtos');
+const form = document.getElementById('form-produto');
+const inputNome = document.getElementById('inputNomeRestaurante');
+const inputHorario = document.getElementById('inputHorarioRestaurante');
+const inputLogo = document.getElementById('inputLogoRestaurante');
+const btnSalvarConf = document.getElementById('salvar-config');
+
+// troca de abas
+abas.forEach(btn => btn.onclick = () => {
+  abas.forEach(b => b.classList.remove('ativo'));
+  conteudos.forEach(c => c.style.display='none');
+  btn.classList.add('ativo');
+  document.getElementById(`tab-${btn.dataset.tab}`).style.display = 'block';
+});
+
+// inicializa com aba produtos
+abas[0].click();
+
+// produtos
+onValue(ref(db, 'produtos/'), snap => {
+  const data = snap.val() || {};
+  listaProdutos.innerHTML = '';
+  Object.entries(data).forEach(([id,p]) => {
     const div = document.createElement('div');
-    div.className = 'produto';
+    div.className = 'admin-card';
     div.innerHTML = `
-      <img src="${p.imagem}" alt="${p.nome}" />
-      <div>
-        <h3>${p.nome}</h3>
-        <p>${p.descricao}</p>
-        <strong>R$ ${p.preco.toFixed(2)}</strong>
-      </div>
-      <div class="botoes">
-        <button onclick="toggleAtivo('${docSnap.id}', ${p.pausado})">
-          ${p.pausado ? 'Ativar' : 'Pausar'}
-        </button>
-        <button onclick="removerProduto('${docSnap.id}')">Excluir</button>
-      </div>
-    `;
-    lista.appendChild(div);
+      <img src="${p.imagem}" />
+      <h3>${p.nome}</h3><p>${p.descricao}</p>
+      <strong>R$ ${p.preco.toFixed(2)}</strong>
+      <div><button onclick="togglePause('${id}', ${p.pausado})">${p.pausado ? 'Despausar' : 'Pausar'}</button>
+      <button onclick="deleteProd('${id}')">Excluir</button></div>`;
+    listaProdutos.appendChild(div);
   });
-}
+});
 
-window.toggleAtivo = async (id, atual) => {
-  await updateDoc(doc(db, 'produtos', id), { pausado: !atual });
+// salvar produto
+form.onsubmit = e => {
+  e.preventDefault();
+  const file = document.getElementById('imagemProduto').files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    push(ref(db,'produtos/'), {
+      nome: document.getElementById('nomeProduto').value,
+      descricao: document.getElementById('descricaoProduto').value,
+      preco: parseFloat(document.getElementById('precoProduto').value),
+      imagem: reader.result,
+      pausado: false
+    });
+    form.reset();
+    abas[0].click();
+  };
+  reader.readAsDataURL(file);
 };
 
-window.removerProduto = async (id) => {
-  if (confirm("Deseja excluir este produto?")) {
-    await deleteDoc(doc(db, 'produtos', id));
+// salvar configurações
+btnSalvarConf.onclick = () => {
+  const conf = {
+    nome: inputNome.value,
+    horario: inputHorario.value
+  };
+  const file = inputLogo.files[0];
+  if (file) {
+    const r = new FileReader();
+    r.onload = () => {
+      set(ref(db,'config/'), {...conf, logo: r.result});
+    };
+    r.readAsDataURL(file);
+  } else {
+    set(ref(db,'config/'), conf);
   }
 };
 
-onSnapshot(collection(db, 'produtos'), renderizarProdutos);
-
-document.getElementById('form-produto').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const nome = nomeProduto.value.trim();
-  const descricao = descricaoProduto.value.trim();
-  const preco = parseFloat(precoProduto.value);
-  const file = imagemProduto.files[0];
-  if (!file) return alert("Escolha uma imagem!");
-
-  const reader = new FileReader();
-  reader.onload = async () => {
-    await addDoc(collection(db, 'produtos'), {
-      nome, descricao, preco, imagem: reader.result, pausado: false
-    });
-    form.produto.reset();
-    mostrarSecao('produtos');
-  };
-  reader.readAsDataURL(file);
-});
-
-mostrarSecao('produtos');
+// funções globais para pausar/excluir
+window.togglePause = (id, atual) =>
+  set(ref(db, `produtos/${id}/pausado`), !atual);
+window.deleteProd = id =>
+  set(ref(db, `produtos/${id}`), null);
