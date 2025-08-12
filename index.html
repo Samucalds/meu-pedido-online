@@ -1,42 +1,147 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menu Digital</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cardápio - Meu Restaurante</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f6f6f6;color:#222}
+    header{background:#ff4d4d;color:#fff;padding:16px;text-align:center}
+    main{padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .card{background:#fff;border-radius:8px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,.08);display:flex;flex-direction:column}
+    .card img{width:100%;height:140px;object-fit:cover;border-radius:6px}
+    .card h3{margin:8px 0 4px;font-size:16px}
+    .card p{margin:0 0 6px;color:#555;font-size:14px}
+    .card strong{margin-top:auto}
+    .btn{background:#ff4d4d;color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;margin-top:8px}
+    #cart-btn{position:fixed;right:16px;bottom:16px;background:#ff4d4d;color:#fff;border-radius:50%;width:56px;height:56px;border:none;font-size:20px;cursor:pointer;box-shadow:0 6px 12px rgba(0,0,0,.15)}
+    #cart-panel{position:fixed;right:16px;bottom:86px;width:320px;max-height:70vh;background:#fff;border-radius:10px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;overflow:auto}
+    #cart-panel h4{margin:0 0 8px}
+    #cart-items p{margin:6px 0;display:flex;justify-content:space-between;align-items:center}
+    input,select{width:100%;padding:8px;margin-top:8px;border-radius:6px;border:1px solid #ddd}
+    .small{font-size:13px;color:#666}
+  </style>
+  <!-- Firebase modular SDK -->
+  <script type="module">
+    // ***** FIREBASE CONFIG - cole o seu aqui ou use o que você já tem *****
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
+      authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
+      projectId: "meu-pedido-online-c2ff1",
+      storageBucket: "meu-pedido-online-c2ff1.appspot.com",
+      messagingSenderId: "949953908074",
+      appId: "1:949953908074:web:8f34ddb9af67a07db1a913",
+      measurementId: "G-B99PGCNDTT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // DOM refs
+    const main = document.currentScript.ownerDocument.querySelector('main') || document.body;
+    // but we'll get by id after DOMReady
+    window.addEventListener('DOMContentLoaded', () => {
+      const cardapio = document.getElementById('cardapio');
+      const cartBtn = document.getElementById('cart-btn');
+      const cartPanel = document.getElementById('cart-panel');
+      const cartItems = document.getElementById('cart-items');
+      const totalEl = document.getElementById('cart-total');
+      const nomeInput = document.getElementById('cust-name');
+      const enderecoInput = document.getElementById('cust-address');
+      const pagamentoInput = document.getElementById('cust-pay');
+
+      let cart = JSON.parse(localStorage.getItem('cart_v1')) || [];
+
+      function saveCart(){ localStorage.setItem('cart_v1', JSON.stringify(cart)); renderCart(); }
+      function renderCart(){
+        cartItems.innerHTML = '';
+        let total = 0;
+        cart.forEach((it, idx) => {
+          total += Number(it.preco);
+          const p = document.createElement('p');
+          p.innerHTML = `${it.nome} <span class="small">R$ ${Number(it.preco).toFixed(2)}</span> <button onclick="window.removeFromCart(${idx})">✖</button>`;
+          cartItems.appendChild(p);
+        });
+        totalEl.textContent = `R$ ${total.toFixed(2)}`;
+        document.getElementById('cart-count').textContent = cart.reduce((s,i)=>s+1,0);
+      }
+      window.removeFromCart = (i)=>{ cart.splice(i,1); saveCart(); };
+
+      cartBtn.addEventListener('click', ()=> {
+        cartPanel.style.display = cartPanel.style.display === 'none' ? 'block' : 'none';
+        renderCart();
+      });
+
+      // Render products in real time
+      const produtosCol = collection(db,'produtos');
+      onSnapshot(produtosCol, (snap) => {
+        cardapio.innerHTML = '';
+        snap.forEach(doc => {
+          const p = doc.data();
+          if (p.pausado) return;
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${p.imagem || ''}" alt="${p.nome}">
+            <h3>${p.nome}</h3>
+            <p>${p.descricao || ''}</p>
+            <strong>R$ ${Number(p.preco).toFixed(2)}</strong>
+            <button class="btn">Adicionar</button>
+          `;
+          const btn = card.querySelector('.btn');
+          btn.onclick = ()=> {
+            cart.push({ nome: p.nome, preco: p.preco });
+            saveCart();
+            btn.textContent = 'Adicionado ✓';
+            setTimeout(()=> btn.textContent = 'Adicionar',800);
+          };
+          cardapio.appendChild(card);
+        });
+      });
+
+      // Finalizar pedido (envia para WhatsApp)
+      document.getElementById('checkout-btn').addEventListener('click', ()=>{
+        if (!cart.length) return alert('Sua sacola está vazia.');
+        const nome = nomeInput.value.trim();
+        const endereco = enderecoInput.value.trim();
+        const pagamento = pagamentoInput.value.trim() || 'Não informado';
+        if (!nome || !endereco) return alert('Preencha nome e endereço.');
+
+        let text = `Pedido de ${nome}%0AEnd: ${endereco}%0APagamento: ${pagamento}%0A%0AItens:%0A`;
+        cart.forEach(it => text += `${it.nome} - R$ ${Number(it.preco).toFixed(2)}%0A`);
+        const total = cart.reduce((s,i)=>s+Number(i.preco),0);
+        text += `%0ATotal: R$ ${total.toFixed(2)}`;
+
+        // pegar número da loja salvo em localStorage (admin salva lá), ou substitua aqui
+        const lojaNum = localStorage.getItem('rest_whatsapp') || '5599999999999';
+        window.open(`https://wa.me/${lojaNum}?text=${encodeURIComponent(text)}`,'_blank');
+      });
+
+      // expose renderCart initially
+      renderCart();
+    });
+  </script>
 </head>
 <body>
+  <header><h1>Meu Restaurante</h1></header>
+  <main id="cardapio">
+    <p style="grid-column:1/-1;text-align:center;">Carregando cardápio...</p>
+  </main>
 
-  <header id="banner">
-    <div class="banner-conteudo">
-      <img src="" id="logoRestaurante" alt="Logo" style="display:none;height:40px;margin-right:10px;">
-      <h1 id="nomeRestaurante">Meu Restaurante</h1>
-      <p id="horarioRestaurante">Horário: --:-- às --:--</p>
-    </div>
-  </header>
+  <button id="cart-btn" title="Abrir sacola">🛒 <span id="cart-count">0</span></button>
 
-  <main id="container-produtos"></main>
-
-  <div id="botao-carrinho">
-    <span id="icone-sacola">🛒</span>
-    <span id="contador-sacola">0</span>
+  <div id="cart-panel" style="display:none">
+    <h4>Sacola</h4>
+    <div id="cart-items"></div>
+    <p id="cart-total">R$ 0.00</p>
+    <input id="cust-name" placeholder="Seu nome" />
+    <input id="cust-address" placeholder="Endereço completo" />
+    <input id="cust-pay" placeholder="Forma de pagamento (Pix / Dinheiro / Cartão)" />
+    <button id="checkout-btn">Enviar pedido via WhatsApp</button>
+    <button onclick="localStorage.removeItem('cart_v1');location.reload()">Esvaziar sacola</button>
   </div>
-
-  <div id="painel-carrinho">
-    <h2>Carrinho</h2>
-    <div id="itens-carrinho"></div>
-    <p>Total: R$ <span id="total-carrinho">0.00</span></p>
-    <input type="text" id="nomeCliente" placeholder="Seu nome" />
-    <input type="text" id="enderecoCliente" placeholder="Endereço completo" />
-    <select id="pagamentoCliente">
-      <option>Pix</option>
-      <option>Dinheiro</option>
-      <option>Cartão</option>
-    </select>
-    <button id="enviar-whatsapp">Enviar para WhatsApp</button>
-  </div>
-
 </body>
 </html>
