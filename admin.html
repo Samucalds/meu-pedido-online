@@ -4,20 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin - Meu Restaurante</title>
-  <style>
-    body{font-family:Arial;margin:0;background:#fafafa;color:#222}
-    header{background:#ff4d4d;color:#fff;padding:14px;text-align:center}
-    nav{display:flex;gap:8px;padding:12px;justify-content:center;background:#fff}
-    nav button{padding:8px 12px;border-radius:8px;border:1px solid #eee;cursor:pointer}
-    main{padding:12px;max-width:900px;margin:0 auto}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-    .produto{background:#fff;padding:10px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-    label{display:block;margin-top:8px;font-weight:600}
-    input,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #ddd}
-    button.save{background:#28a745;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;margin-top:8px}
-    .actions{display:flex;gap:8px;margin-top:8px}
-  </style>
-
+  <link rel="stylesheet" href="style.css" />
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -44,33 +31,42 @@
       const inputImg = document.getElementById('imagemProduto');
       const inputWhats = document.getElementById('restWhats');
 
-      // load saved whatsapp (config)
       document.getElementById('restWhats').value = localStorage.getItem('rest_whatsapp') || '';
 
-      // observe produtos collection
       const col = collection(db,'produtos');
       onSnapshot(col, snap => {
         lista.innerHTML = '';
+        if (snap.empty) {
+          lista.innerHTML = '<p class="muted">Nenhum produto cadastrado.</p>';
+          return;
+        }
         snap.forEach(docu => {
           const p = docu.data();
           const id = docu.id;
-          const div = document.createElement('div');
-          div.className = 'produto';
-          div.innerHTML = `<strong>${p.nome}</strong><p>${p.descricao || ''}</p><p>R$ ${Number(p.preco).toFixed(2)}</p>
-            <div class="actions">
-              <button onclick="togglePause('${id}', ${p.pausado ? 'true' : 'false'})">${p.pausado ? 'Ativar' : 'Pausar'}</button>
-              <button onclick="removeProd('${id}')">Excluir</button>
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          card.innerHTML = `
+            <div class="product-header">
+              <h3>${p.nome}</h3>
+              <div class="badge ${p.pausado ? 'paused' : 'active'}">${p.pausado ? 'Pausado' : 'Ativo'}</div>
+            </div>
+            <p class="muted">${p.descricao || ''}</p>
+            <div class="product-footer">
+              <span>R$ ${Number(p.preco).toFixed(2)}</span>
+              <div class="actions">
+                <button class="btn small" onclick="togglePause('${id}', ${p.pausado ? 'true' : 'false'})">${p.pausado ? 'Ativar' : 'Pausar'}</button>
+                <button class="btn small danger" onclick="removeProd('${id}')">Excluir</button>
+              </div>
             </div>
           `;
-          lista.appendChild(div);
+          lista.appendChild(card);
         });
       });
 
-      // submit add product
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const file = inputImg.files[0];
-        if (!file) return alert('Escolha imagem');
+        if (!file) return alert('Escolha uma imagem');
         const reader = new FileReader();
         reader.onload = async () => {
           try {
@@ -82,7 +78,8 @@
               pausado: false
             });
             form.reset();
-            alert('Produto salvo com sucesso!');
+            alert('Produto salvo!');
+            document.getElementById('tab-produtos').click();
           } catch(err) {
             console.error(err);
             alert('Erro ao salvar produto.');
@@ -91,16 +88,13 @@
         reader.readAsDataURL(file);
       });
 
-      // save whatsapp config locally
       document.getElementById('btnSaveConf').addEventListener('click', ()=>{
         const v = inputWhats.value.replace(/\D/g,'');
         localStorage.setItem('rest_whatsapp', v);
-        alert('WhatsApp salvo localmente.');
+        alert('WhatsApp salvo (local).');
       });
-
     });
 
-    // expose functions to window
     window.removeProd = async (id) => {
       if (!confirm('Excluir produto?')) return;
       try { await deleteDoc(doc(getFirestore(), 'produtos', id)); } catch(err){ console.error(err); alert('Erro'); }
@@ -111,37 +105,40 @@
   </script>
 </head>
 <body>
-  <header><h1>Admin - Meu Restaurante</h1></header>
-  <nav>
-    <button onclick="document.getElementById('tab-produtos').style.display='block';document.getElementById('tab-adicionar').style.display='none';document.getElementById('tab-config').style.display='none'">Produtos</button>
-    <button onclick="document.getElementById('tab-produtos').style.display='none';document.getElementById('tab-adicionar').style.display='block';document.getElementById('tab-config').style.display='none'">Adicionar</button>
-    <button onclick="document.getElementById('tab-produtos').style.display='none';document.getElementById('tab-adicionar').style.display='none';document.getElementById('tab-config').style.display='block'">Configurações</button>
+  <header class="topbar">
+    <h1>Admin - Meu Restaurante</h1>
+  </header>
+
+  <nav class="tabs">
+    <button id="tab-produtos" class="tab active" onclick="document.getElementById('view-produtos').style.display='block';document.getElementById('view-adicionar').style.display='none';document.getElementById('view-config').style.display='none';document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Produtos</button>
+    <button class="tab" onclick="document.getElementById('view-produtos').style.display='none';document.getElementById('view-adicionar').style.display='block';document.getElementById('view-config').style.display='none';document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Adicionar</button>
+    <button class="tab" onclick="document.getElementById('view-produtos').style.display='none';document.getElementById('view-adicionar').style.display='none';document.getElementById('view-config').style.display='block';document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Configurações</button>
   </nav>
 
-  <main>
-    <section id="tab-produtos">
+  <main class="container">
+    <section id="view-produtos">
       <h2>Produtos cadastrados</h2>
-      <div id="lista-produtos" class="grid">
-        <p>Carregando...</p>
-      </div>
+      <div id="lista-produtos" class="grid-cards"></div>
     </section>
 
-    <section id="tab-adicionar" style="display:none">
+    <section id="view-adicionar" style="display:none">
       <h2>Adicionar produto</h2>
-      <form id="form-produto">
+      <form id="form-produto" class="form">
         <label>Nome</label><input id="nomeProduto" required />
         <label>Descrição</label><textarea id="descricaoProduto"></textarea>
         <label>Preço (ex: 19.90)</label><input id="precoProduto" type="number" step="0.01" required />
         <label>Imagem</label><input id="imagemProduto" type="file" accept="image/*" required />
-        <button class="save" type="submit">Salvar produto</button>
+        <button class="btn primary" type="submit">Salvar produto</button>
       </form>
     </section>
 
-    <section id="tab-config" style="display:none">
+    <section id="view-config" style="display:none">
       <h2>Configurações</h2>
-      <label>WhatsApp do restaurante (com DDD)</label>
-      <input id="restWhats" placeholder="Ex: 5591999999999" />
-      <button id="btnSaveConf" class="save">Salvar</button>
+      <div class="form">
+        <label>WhatsApp do restaurante (com DDD)</label>
+        <input id="restWhats" placeholder="Ex: 5591999999999" />
+        <button id="btnSaveConf" class="btn">Salvar</button>
+      </div>
     </section>
   </main>
 </body>
