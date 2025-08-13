@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Adicionar - Meu Restaurante</title>
-  <style>body{font-family:Arial;padding:12px}</style>
+  <link rel="stylesheet" href="style.css" />
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -41,13 +41,15 @@
   </script>
 </head>
 <body>
-  <h2>Adicionar produto</h2>
-  <form id="f">
-    <input id="n" placeholder="Nome" required /><br>
-    <textarea id="d" placeholder="Descrição"></textarea><br>
-    <input id="p" type="number" step="0.01" placeholder="Preço" required /><br>
-    <input id="img" type="file" accept="image/*" required /><br>
-    <button type="submit">Salvar</button>
-  </form>
+  <header class="topbar"><h1>Adicionar produto</h1></header>
+  <main class="container">
+    <form id="f" class="form">
+      <label>Nome</label><input id="n" required />
+      <label>Descrição</label><textarea id="d"></textarea>
+      <label>Preço</label><input id="p" type="number" step="0.01" required />
+      <label>Imagem</label><input id="img" type="file" accept="image/*" required />
+      <button type="submit" class="btn primary">Salvar</button>
+    </form>
+  </main>
 </body>
 </html>
