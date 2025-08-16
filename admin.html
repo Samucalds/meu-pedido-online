@@ -1,145 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin - Meu Restaurante</title>
-  <link rel="stylesheet" href="style.css" />
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
-      authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
-      projectId: "meu-pedido-online-c2ff1",
-      storageBucket: "meu-pedido-online-c2ff1.appspot.com",
-      messagingSenderId: "949953908074",
-      appId: "1:949953908074:web:8f34ddb9af67a07db1a913",
-      measurementId: "G-B99PGCNDTT"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const lista = document.getElementById('lista-produtos');
-      const form = document.getElementById('form-produto');
-      const inputNome = document.getElementById('nomeProduto');
-      const inputDesc = document.getElementById('descricaoProduto');
-      const inputPreco = document.getElementById('precoProduto');
-      const inputImg = document.getElementById('imagemProduto');
-      const inputWhats = document.getElementById('restWhats');
-
-      document.getElementById('restWhats').value = localStorage.getItem('rest_whatsapp') || '';
-
-      const col = collection(db,'produtos');
-      onSnapshot(col, snap => {
-        lista.innerHTML = '';
-        if (snap.empty) {
-          lista.innerHTML = '<p class="muted">Nenhum produto cadastrado.</p>';
-          return;
-        }
-        snap.forEach(docu => {
-          const p = docu.data();
-          const id = docu.id;
-          const card = document.createElement('div');
-          card.className = 'product-card';
-          card.innerHTML = `
-            <div class="product-header">
-              <h3>${p.nome}</h3>
-              <div class="badge ${p.pausado ? 'paused' : 'active'}">${p.pausado ? 'Pausado' : 'Ativo'}</div>
-            </div>
-            <p class="muted">${p.descricao || ''}</p>
-            <div class="product-footer">
-              <span>R$ ${Number(p.preco).toFixed(2)}</span>
-              <div class="actions">
-                <button class="btn small" onclick="togglePause('${id}', ${p.pausado ? 'true' : 'false'})">${p.pausado ? 'Ativar' : 'Pausar'}</button>
-                <button class="btn small danger" onclick="removeProd('${id}')">Excluir</button>
-              </div>
-            </div>
-          `;
-          lista.appendChild(card);
-        });
-      });
-
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const file = inputImg.files[0];
-        if (!file) return alert('Escolha uma imagem');
-        const reader = new FileReader();
-        reader.onload = async () => {
-          try {
-            await addDoc(col, {
-              nome: inputNome.value.trim(),
-              descricao: inputDesc.value.trim(),
-              preco: Number(inputPreco.value),
-              imagem: reader.result,
-              pausado: false
-            });
-            form.reset();
-            alert('Produto salvo!');
-            document.getElementById('tab-produtos').click();
-          } catch(err) {
-            console.error(err);
-            alert('Erro ao salvar produto.');
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-
-      document.getElementById('btnSaveConf').addEventListener('click', ()=>{
-        const v = inputWhats.value.replace(/\D/g,'');
-        localStorage.setItem('rest_whatsapp', v);
-        alert('WhatsApp salvo (local).');
-      });
-    });
-
-    window.removeProd = async (id) => {
-      if (!confirm('Excluir produto?')) return;
-      try { await deleteDoc(doc(getFirestore(), 'produtos', id)); } catch(err){ console.error(err); alert('Erro'); }
-    };
-    window.togglePause = async (id, atual) => {
-      try { await updateDoc(doc(getFirestore(), 'produtos', id), { pausado: !atual }); } catch(err){ console.error(err); alert('Erro'); }
-    };
-  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js" type="module"></script>
+  <script src="firebase-config.js" type="module"></script>
 </head>
 <body>
-  <header class="topbar">
-    <h1>Admin - Meu Restaurante</h1>
+  <header class="admin-header">
+    <h1>Painel Administrativo</h1>
   </header>
 
-  <nav class="tabs">
-    <button id="tab-produtos" class="tab active" onclick="document.getElementById('view-produtos').style.display='block';document.getElementById('view-adicionar').style.display='none';document.getElementById('view-config').style.display='none';document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Produtos</button>
-    <button class="tab" onclick="document.getElementById('view-produtos').style.display='none';document.getElementById('view-adicionar').style.display='block';document.getElementById('view-config').style.display='none';document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Adicionar</button>
-    <button class="tab" onclick="document.getElementById('view-produtos').style.display='none';document.getElementById('view-adicionar').style.display='none';document.getElementById('view-config').style.display='block';document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Configurações</button>
+  <nav class="admin-nav">
+    <button id="btnProdutos" class="active">📦 Produtos</button>
+    <button id="btnAdicionar">➕ Adicionar Produto</button>
+    <button id="btnConfig">⚙️ Configurações</button>
   </nav>
 
-  <main class="container">
-    <section id="view-produtos">
-      <h2>Produtos cadastrados</h2>
-      <div id="lista-produtos" class="grid-cards"></div>
+  <main class="admin-main">
+    <!-- Lista de Produtos -->
+    <section id="produtosSection" class="admin-section active">
+      <h2>Produtos Cadastrados</h2>
+      <ul id="listaProdutos" class="lista-produtos"></ul>
     </section>
 
-    <section id="view-adicionar" style="display:none">
-      <h2>Adicionar produto</h2>
-      <form id="form-produto" class="form">
-        <label>Nome</label><input id="nomeProduto" required />
-        <label>Descrição</label><textarea id="descricaoProduto"></textarea>
-        <label>Preço (ex: 19.90)</label><input id="precoProduto" type="number" step="0.01" required />
-        <label>Imagem</label><input id="imagemProduto" type="file" accept="image/*" required />
-        <button class="btn primary" type="submit">Salvar produto</button>
+    <!-- Adicionar Produto -->
+    <section id="adicionarSection" class="admin-section">
+      <h2>Adicionar Produto</h2>
+      <form id="formAdicionarProduto">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" required>
+
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" required></textarea>
+
+        <label for="preco">Preço (R$):</label>
+        <input type="number" id="preco" step="0.01" required>
+
+        <label for="categoria">Categoria:</label>
+        <input type="text" id="categoria" required>
+
+        <label for="imagem">Imagem:</label>
+        <input type="file" id="imagem" accept="image/*">
+
+        <button type="submit" class="btn-salvar">Salvar Produto</button>
       </form>
     </section>
 
-    <section id="view-config" style="display:none">
+    <!-- Configurações -->
+    <section id="configSection" class="admin-section">
       <h2>Configurações</h2>
-      <div class="form">
-        <label>WhatsApp do restaurante (com DDD)</label>
-        <input id="restWhats" placeholder="Ex: 5591999999999" />
-        <button id="btnSaveConf" class="btn">Salvar</button>
-      </div>
+      <p>Aqui você poderá alterar nome, logo e horário de funcionamento.</p>
     </section>
   </main>
+
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
