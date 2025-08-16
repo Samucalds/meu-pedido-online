@@ -1,55 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Adicionar - Meu Restaurante</title>
-  <link rel="stylesheet" href="style.css" />
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
-      authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
-      projectId: "meu-pedido-online-c2ff1",
-      storageBucket: "meu-pedido-online-c2ff1.appspot.com",
-      messagingSenderId: "949953908074",
-      appId: "1:949953908074:web:8f34ddb9af67a07db1a913",
-      measurementId: "G-B99PGCNDTT"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.addEventListener('DOMContentLoaded', ()=>{
-      const form = document.getElementById('f');
-      form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const nome = document.getElementById('n').value.trim();
-        const desc = document.getElementById('d').value.trim();
-        const preco = Number(document.getElementById('p').value);
-        const file = document.getElementById('img').files[0];
-        if (!file) return alert('Escolha imagem');
-        const r = new FileReader();
-        r.onload = async () => {
-          await addDoc(collection(db,'produtos'), { nome, descricao:desc, preco, imagem:r.result, pausado:false });
-          alert('Produto adicionado');
-          form.reset();
-        };
-        r.readAsDataURL(file);
-      });
-    });
-  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Produto</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js" type="module"></script>
+  <script src="firebase-config.js" type="module"></script>
 </head>
 <body>
-  <header class="topbar"><h1>Adicionar produto</h1></header>
-  <main class="container">
-    <form id="f" class="form">
-      <label>Nome</label><input id="n" required />
-      <label>Descrição</label><textarea id="d"></textarea>
-      <label>Preço</label><input id="p" type="number" step="0.01" required />
-      <label>Imagem</label><input id="img" type="file" accept="image/*" required />
-      <button type="submit" class="btn primary">Salvar</button>
+  <header class="admin-header">
+    <h1>Adicionar Produto</h1>
+  </header>
+
+  <main class="admin-main">
+    <form id="formAdicionarProduto">
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" required>
+
+      <label for="descricao">Descrição:</label>
+      <textarea id="descricao" required></textarea>
+
+      <label for="preco">Preço (R$):</label>
+      <input type="number" id="preco" step="0.01" required>
+
+      <label for="categoria">Categoria:</label>
+      <input type="text" id="categoria" required>
+
+      <label for="imagem">Imagem:</label>
+      <input type="file" id="imagem" accept="image/*">
+
+      <button type="submit" class="btn-salvar">Salvar Produto</button>
     </form>
+
+    <div id="previewContainer" class="preview-container">
+      <p>Pré-visualização da imagem:</p>
+      <img id="previewImagem" alt="Pré-visualização" style="max-width: 200px; display:none;">
+    </div>
   </main>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const form = document.getElementById('formAdicionarProduto');
+    const inputImagem = document.getElementById('imagem');
+    const previewImagem = document.getElementById('previewImagem');
+
+    let imagemBase64 = "";
+
+    // Pré-visualizar imagem
+    inputImagem.addEventListener('change', () => {
+      const file = inputImagem.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          imagemBase64 = reader.result;
+          previewImagem.src = imagemBase64;
+          previewImagem.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Salvar no Firebase
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById('nome').value;
+      const descricao = document.getElementById('descricao').value;
+      const preco = parseFloat(document.getElementById('preco').value);
+      const categoria = document.getElementById('categoria').value;
+
+      try {
+        await addDoc(collection(db, "produtos"), {
+          nome,
+          descricao,
+          preco,
+          categoria,
+          imagem: imagemBase64
+        });
+
+        alert("Produto adicionado com sucesso!");
+        window.location.href = "admin.html";
+      } catch (error) {
+        console.error("Erro ao adicionar produto: ", error);
+        alert("Erro ao salvar produto.");
+      }
+    });
+  </script>
 </body>
 </html>
