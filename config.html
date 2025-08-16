@@ -1,48 +1,103 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Configurações</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js" type="module"></script>
+  <script src="firebase-config.js" type="module"></script>
 </head>
 <body>
-  <header class="header">
+  <header class="admin-header">
     <h1>Configurações</h1>
   </header>
-  <nav class="nav">
-    <button onclick="location.href='admin.html'">Produtos</button>
-    <button onclick="location.href='adicionar.html'">Adicionar Produto</button>
-    <button onclick="location.href='config.html'">Configurações</button>
-  </nav>
 
-  <section class="formulario">
-    <label>Nome do Estabelecimento</label>
-    <input type="text" id="nomeLoja">
-    <label>Número do WhatsApp (com DDD)</label>
-    <input type="text" id="whatsapp">
-    <label>Horário de Funcionamento</label>
-    <input type="text" id="funcionamento">
-    <button onclick="salvarConfig()">Salvar Configurações</button>
-  </section>
+  <main class="admin-main">
+    <form id="formConfig">
+      <label for="nomeEstabelecimento">Nome do Estabelecimento:</label>
+      <input type="text" id="nomeEstabelecimento" required>
 
-  <script>
-    function salvarConfig() {
-      const nome = document.getElementById('nomeLoja').value.trim();
-      const whatsapp = document.getElementById('whatsapp').value.trim();
-      const funcionamento = document.getElementById('funcionamento').value.trim();
+      <label for="horarioFuncionamento">Horário de Funcionamento:</label>
+      <input type="text" id="horarioFuncionamento" placeholder="Ex: 10h - 22h" required>
 
-      const config = { nome, whatsapp, funcionamento };
-      localStorage.setItem('configLoja', JSON.stringify(config));
-      alert('Configurações salvas com sucesso!');
+      <label for="logo">Logo:</label>
+      <input type="file" id="logo" accept="image/*">
+
+      <div id="previewContainerLogo" class="preview-container">
+        <p>Pré-visualização da logo:</p>
+        <img id="previewLogo" alt="Logo" style="max-width: 150px; display:none;">
+      </div>
+
+      <button type="submit" class="btn-salvar">Salvar Configurações</button>
+    </form>
+  </main>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const form = document.getElementById('formConfig');
+    const inputLogo = document.getElementById('logo');
+    const previewLogo = document.getElementById('previewLogo');
+
+    let logoBase64 = "";
+
+    // Pré-visualizar logo
+    inputLogo.addEventListener('change', () => {
+      const file = inputLogo.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          logoBase64 = reader.result;
+          previewLogo.src = logoBase64;
+          previewLogo.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Carregar configurações salvas
+    async function carregarConfig() {
+      const docRef = doc(db, "config", "dados");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('nomeEstabelecimento').value = data.nome || "";
+        document.getElementById('horarioFuncionamento').value = data.horario || "";
+        if (data.logo) {
+          logoBase64 = data.logo;
+          previewLogo.src = logoBase64;
+          previewLogo.style.display = "block";
+        }
+      }
     }
 
-    window.onload = () => {
-      const config = JSON.parse(localStorage.getItem('configLoja')) || {};
-      document.getElementById('nomeLoja').value = config.nome || '';
-      document.getElementById('whatsapp').value = config.whatsapp || '';
-      document.getElementById('funcionamento').value = config.funcionamento || '';
-    };
+    // Salvar configurações
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById('nomeEstabelecimento').value;
+      const horario = document.getElementById('horarioFuncionamento').value;
+
+      try {
+        await setDoc(doc(db, "config", "dados"), {
+          nome,
+          horario,
+          logo: logoBase64
+        });
+
+        alert("Configurações salvas com sucesso!");
+        window.location.href = "admin.html";
+      } catch (error) {
+        console.error("Erro ao salvar configurações: ", error);
+        alert("Erro ao salvar.");
+      }
+    });
+
+    carregarConfig();
   </script>
 </body>
 </html>
