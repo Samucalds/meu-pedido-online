@@ -1,8 +1,10 @@
-// firebase-config.js
+// Importa as funções do Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Configuração do Firebase - substitua com as suas credenciais
+// Suas credenciais do Firebase
 const firebaseConfig = {
-   apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
+ apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
   authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
   projectId: "meu-pedido-online-c2ff1",
   storageBucket: "meu-pedido-online-c2ff1.firebasestorage.app",
@@ -11,8 +13,7 @@ const firebaseConfig = {
   measurementId: "G-B99PGCNDTT"
 };
 
-// Inicializar o Firebase
-firebase.initializeApp(firebaseConfig);
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
 
-// Ativar Firestore
-const db = firebase.firestore();
+// Conecta
