@@ -7,7 +7,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebas
 
 // Configuração do seu projeto Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
+   apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
   authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
   projectId: "meu-pedido-online-c2ff1",
   storageBucket: "meu-pedido-online-c2ff1.firebasestorage.app",
