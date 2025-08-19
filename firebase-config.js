@@ -1,10 +1,13 @@
-// Importa as funções do Firebase
+// firebase-config.js
+// Arquivo de configuração do Firebase
+
+// Importando módulos do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Suas credenciais do Firebase
+// Configuração do seu projeto Firebase
 const firebaseConfig = {
- apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
+  apiKey: "AIzaSyArGMJgRxw3qUkQcv6vVur_o921vCbJIFI",
   authDomain: "meu-pedido-online-c2ff1.firebaseapp.com",
   projectId: "meu-pedido-online-c2ff1",
   storageBucket: "meu-pedido-online-c2ff1.firebasestorage.app",
@@ -13,7 +16,11 @@ const firebaseConfig = {
   measurementId: "G-B99PGCNDTT"
 };
 
-// Inicializa o Firebase
+// Inicializando o Firebase
 const app = initializeApp(firebaseConfig);
 
-// Conecta
+// Inicializando Firestore
+const db = getFirestore(app);
+
+// Exportando para usar nos outros arquivos
+export { db };
